@@ -158,8 +158,8 @@ buscar_zorro:
     ret
 
 encontrado_zorro:
-    mov rbx, rsi
-    dec rbx
+    mov rbx, rsi   ; Mueve el valor del registro rsi (posición actual del zorro) a rbx
+    dec rbx         ; Decrementa rbx en 1 para apuntar correctamente a la posición actual del zorro
 
     mov rdi, input_zorro
     mov al, [rdi]
@@ -182,42 +182,42 @@ encontrado_zorro:
     ret
 
 mover_arriba:
-    sub rbx, 7
-    jmp validar_movimiento_zorro
+    sub rbx, 7                  ; resto 7 a rbx para mover al zorro una fila mas abajo
+    jmp validar_movimiento_zorro 
 
 mover_abajo:
-    add rbx, 7
+    add rbx, 7                  ; sumo 7 a rbx para mover al zorro una fila mas arriba
     jmp validar_movimiento_zorro
 
 mover_izquierda:
-    dec rbx
+    dec rbx                     ; resto 1 a rbx para mover al zorro una columna a la izquierda
     jmp validar_movimiento_zorro
 
 mover_derecha:
-    inc rbx
+    inc rbx                     ; sumo 1 a rbx para mover al zorro una columna a la derecha
     jmp validar_movimiento_zorro
 
 mover_arriba_derecha:
-    sub rbx, 6
+    sub rbx, 6                  ; resto 6 a rbx para mover al zorro en diagonal arriba derecha
     jmp validar_movimiento_zorro
 
 mover_arriba_izquierda:
-    sub rbx, 8
+    sub rbx, 8                  ; resto 8 a rbx para mover al zorro en diagonal arriba izquierda
     jmp validar_movimiento_zorro
 
 mover_abajo_izquierda:
-    add rbx, 6
+    add rbx, 6                  ; sumo 6 a rbx para mover al zorro en diagonal abajo izquierda
     jmp validar_movimiento_zorro
 
 mover_abajo_derecha:
-    add rbx, 8
+    add rbx, 8                   ; sumo 8 a rbx para mover al zorro en diagonal abajo derecha
     jmp validar_movimiento_zorro
 
 validar_movimiento_zorro:
-    cmp byte [rbx], 2
-    jne movimiento_invalido
-    mov byte [rsi - 1], 2
-    mov byte [rbx], 3
+    cmp byte [rbx], 2           ;comparar destino con una posicion vacia que es 2
+    jne movimiento_invalido         
+    mov byte [rsi - 1], 2       ; actualizo la posicion anterior del zorro con 2 (vacio)
+    mov byte [rbx], 3           ; coloco al zorro en la nueva posicion
     ret
 
 movimiento_invalido:
