@@ -21,7 +21,7 @@ section .data
                 db  -1, -1,  1,  1,  1, -1, -1
                 db   1,  1,  1,  1,  1,  1,  1
                 db   1,  2,  2,  2,  2,  2,  1
-                db   1,  2,  2,  3,  2,  2,  1
+                db   1,  2,  2,  3,  1,  2,  1
                 db  -1, -1,  2,  2,  2, -1, -1
                 db  -1, -1,  2,  2,  2, -1, -1
 
@@ -31,19 +31,17 @@ section .data
     simbolo_zorro               db 'X', 0
     simbolo_espacio_vacio       db ' ', 0
     simbolo_separador           db '|', 0
-    ;longfila                    db 7     ME TIRA ERROR USANDO VARIABLE, HARDCODEO EL 7 POR EL MOMENTO
+    mensaje_mover_oca           db "Ingrese la fila y columna de la oca a mover (ejemplo: 3 3). Presione f para salir de la partida: ", 0
+    mensaje_mover_oca_direccion db "Mueva la oca con w: arriba /a: izquierda /s: abajo /d: derecha. Presione f para salir de la partida: ", 0
+    formatInputFilCol           db "%hhu %hhu", 0                               ; Formato para leer enteros de 1 byte
+    msjErrorInput               db "Los datos ingresados son inválidos. Intente nuevamente.", 0
+    mensaje_mover_zorro         db "Mueva el zorro con w: arriba /a: izquierda /s: abajo /d: derecha /e: arriba-derecha /q: arriba-izquierda /z: abajo-izquierda /x: abajo-derecha. Presione f para salir de la partida: ", 0
+    mensaje_mov_invalido        db "Movimiento invalido, intente nuevamente", 0
+    mensaje_ingresar_j1         db "Ingrese el nombre del jugador 1 (zorro): ", 0
+    mensaje_ingresar_j2         db "Ingrese el nombre del jugador 2 (ocas): ", 0
+    mensaje_ganador             db "El ganador es: ", 0
+    mensaje_fin_juego           db "El juego ha sido abandonado.", 0
 
-    mensaje_mover_oca                   db "Ingrese la fila y columna de la oca a mover (ejemplo: 3 3). Presione f para salir de la partida: ", 0
-    mensaje_mover_oca_direccion         db "Mueva la oca con w: arriba /a: izquierda /s: abajo /d: derecha. Presione f para salir de la partida: ", 0
-    formatInputFilCol                   db "%hhu %hhu", 0                               ; Formato para leer enteros de 1 byte
-    msjErrorInput                       db "Los datos ingresados son inválidos. Intente nuevamente.", 0
-    mensaje_mover_zorro                 db "Mueva el zorro con w: arriba /a: izquierda /s: abajo /d: derecha /e: arriba-derecha /q: arriba-izquierda /z: abajo-izquierda /x: abajo-derecha. Presione f para salir de la partida: ", 0
-    mensaje_mov_invalido                db "Movimiento invalido, intente nuevamente", 0
-    mensaje_ingresar_j1                 db "Ingrese el nombre del jugador 1 (zorro): ", 0
-    mensaje_ingresar_j2                 db "Ingrese el nombre del jugador 2 (ocas): ", 0
-    mensaje_ganador                     db "El ganador es: ", 0
-    mensaje_fin_juego                   db "El juego ha sido abandonado.", 0
-    
 section .bss
     buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
     input_oca       resb 10
@@ -253,41 +251,69 @@ zorro_encontrado:
 
 mover_zorro_arriba:
     sub rbx, 7                  ; resto 7 a rbx para mover al zorro una fila hacia arriba
+    mov rdi, -7                 ; la dirección del desplazamiento es -7
     jmp validar_movimiento_zorro 
 
 mover_zorro_abajo:
     add rbx, 7                  ; sumo 7 a rbx para mover al zorro una fila hacia abajo
+    mov rdi, 7                  ; la dirección del desplazamiento es 7
     jmp validar_movimiento_zorro
 
 mover_zorro_izquierda:
     dec rbx                     ; resto 1 a rbx para mover al zorro una columna a la izquierda
+    mov rdi, -1                 ; la dirección del desplazamiento es -1
     jmp validar_movimiento_zorro
 
 mover_zorro_derecha:
     inc rbx                     ; sumo 1 a rbx para mover al zorro una columna a la derecha
+    mov rdi, 1                  ; la dirección del desplazamiento es 1
     jmp validar_movimiento_zorro
 
 mover_zorro_arriba_derecha:
     sub rbx, 6                  ; resto 6 a rbx para mover al zorro en diagonal arriba derecha
+    mov rdi, -6                 ; la dirección del desplazamiento es -6
     jmp validar_movimiento_zorro
 
 mover_zorro_arriba_izquierda:
     sub rbx, 8                  ; resto 8 a rbx para mover al zorro en diagonal arriba izquierda
+    mov rdi, -8                 ; la dirección del desplazamiento es -8
     jmp validar_movimiento_zorro
 
 mover_zorro_abajo_izquierda:
     add rbx, 6                  ; sumo 6 a rbx para mover al zorro en diagonal abajo izquierda
+    mov rdi, 6                  ; la dirección del desplazamiento es 6
     jmp validar_movimiento_zorro
 
 mover_zorro_abajo_derecha:
-    add rbx, 8                   ; sumo 8 a rbx para mover al zorro en diagonal abajo derecha
+    add rbx, 8                  ; sumo 8 a rbx para mover al zorro en diagonal abajo derecha
+    mov rdi, 8                  ; la dirección del desplazamiento es 8
     jmp validar_movimiento_zorro
 
 validar_movimiento_zorro:
     cmp byte [rbx], 2           ; Comparar destino con una posición vacía (2)
-    jne movimiento_invalido_zorro         
+    jne verificar_si_oca       ; Si no está vacía, verificar si se puede comer una oca
     mov byte [rsi - 1], 2       ; Actualizar la posición anterior del zorro con 2 (vacío)
     mov byte [rbx], 3           ; Colocar al zorro en la nueva posición
+    mov byte [inputValido], 'S' ; Indicar que el movimiento fue válido
+    ret
+verificar_si_oca:
+    cmp byte [rbx], 1           ; Comparar destino con una oca (1)
+    jne movimiento_invalido_zorro ; Si no es una oca, el movimiento es inválido
+    jmp validar_comer_oca       ; Ir a validar si se puede comer la oca
+
+validar_comer_oca:
+    ; Verificar si hay una oca en la posición intermedia
+    ; RDI contiene la dirección del desplazamiento en mover_zorro_*
+    mov rax, rbx
+    add rax, rdi
+    cmp byte [rax], 2           ; Verificar si la posición de salto está vacía
+    jne movimiento_invalido_zorro
+    ; Mover el zorro a la posición de salto
+    mov byte [rsi - 1], 2       ; Actualizar la posición anterior del zorro con 2 (vacío)
+    mov byte [rax], 3           ; Colocar el zorro en la nueva posición de salto
+    ; Borrar la oca que fue comida
+    sub rax, rdi
+    mov byte [rax], 2
     mov byte [inputValido], 'S' ; Indicar que el movimiento fue válido
     ret
 
