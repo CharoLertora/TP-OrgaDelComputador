@@ -28,7 +28,7 @@ section .data
                 db  -1, -1,  1,  1,  1, -1, -1
                 db   1,  1,  1,  1,  1,  1,  1
                 db   1,  2,  2,  2,  2,  2,  1
-                db   1,  2,  2,  3,  2,  2,  1
+                db   1,  2,  2,  3,  1,  2,  1
                 db  -1, -1,  2,  2,  2, -1, -1
                 db  -1, -1,  2,  2,  2, -1, -1
 
@@ -62,6 +62,7 @@ section .bss
     nombre_jugador1 resb 50
     nombre_jugador2 resb 50
     turno           resb 1
+    comio_oca       resb 1
 
 section .text
 main:
@@ -93,7 +94,9 @@ turno_zorro:
     add     rsp,8
     cmp     byte [inputValido], 'R'  ;comparo si el movimiento del zorro fue inválido
     je      turno_zorro              ;si fue inválido, vuelvo a pedir movimiento del zorro
-    mov     byte [turno], 2          ;si fue válido, cambio el turno a las ocas
+    cmp     byte [comio_oca], 1      ; Si comió una oca, no cambiar de turno
+    je      continuar_juego
+    mov     byte [turno], 2          ;si fue válido y no comió oca, cambio el turno a las ocas
     jmp     continuar_juego          ;voy a la etiqueta continuar_juego
 
 turno_ocas:
@@ -308,8 +311,10 @@ validar_movimiento_zorro:
     jne verificar_si_oca       ; Si no está vacía, verificar si se puede comer una oca
     mov byte [rsi - 1], 2       ; Actualizar la posición anterior del zorro con 2 (vacío)
     mov byte [rbx], 3           ; Colocar al zorro en la nueva posición
+    mov byte [comio_oca], 0     ; Indicar que no comió oca
     mov byte [inputValido], 'S' ; Indicar que el movimiento fue válido
     ret
+
 verificar_si_oca:
     cmp byte [rbx], 1           ; Comparar destino con una oca (1)
     jne movimiento_invalido_zorro ; Si no es una oca, el movimiento es inválido
@@ -332,7 +337,15 @@ validar_comer_oca:
     cmp qword [cantidad_ocas_eliminadas], 12  ;si gana el zorro
     je ganador_zorro
     mov byte [inputValido], 'S' ; Indicar que el movimiento fue válido
-    ret
+    mov byte [comio_oca], 1     ; Indicar que el zorro comió una oca
+    ; Reconstruir e imprimir el tablero para reflejar el estado actual
+    sub     rsp,8
+    call    construir_tablero
+    add     rsp,8
+    sub     rsp,8
+    call    imprimir_tablero
+    add     rsp,8
+    jmp turno_zorro             ; Continuar el turno del zorro
 
 movimiento_invalido_zorro:
     mov byte [inputValido], 'R'
@@ -475,4 +488,5 @@ fin_juego:
     mPuts
     mov     eax, 60                 ; syscall: exit
     xor     edi, edi                ; status: 0
-    syscall    
+    syscall
+
