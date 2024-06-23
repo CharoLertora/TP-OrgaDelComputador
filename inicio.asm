@@ -12,16 +12,23 @@ global main
     add     rsp,8
 %endmacro
 
+%macro mPrintF 0
+    sub     rsp,8
+    call    printf
+    add     rsp,8
+%endmacro
+
 extern puts
 extern gets
 extern sscanf
+extern printf
 
 section .data
     tablero     db  -1, -1,  1,  1,  1, -1, -1
                 db  -1, -1,  1,  1,  1, -1, -1
                 db   1,  1,  1,  1,  1,  1,  1
                 db   1,  2,  2,  2,  2,  2,  1
-                db   1,  2,  2,  3,  1,  2,  1
+                db   1,  2,  2,  3,  2,  2,  1
                 db  -1, -1,  2,  2,  2, -1, -1
                 db  -1, -1,  2,  2,  2, -1, -1
 
@@ -39,8 +46,10 @@ section .data
     mensaje_mov_invalido        db "Movimiento invalido, intente nuevamente", 0
     mensaje_ingresar_j1         db "Ingrese el nombre del jugador 1 (zorro): ", 0
     mensaje_ingresar_j2         db "Ingrese el nombre del jugador 2 (ocas): ", 0
-    mensaje_ganador             db "El ganador es: ", 0
+    mensaje_ganador             db "El ganador es: %s ", 0
     mensaje_fin_juego           db "El juego ha sido abandonado.", 0
+    mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli", 0
+    cantidad_ocas_eliminadas    dq 0
 
 section .bss
     buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
@@ -205,6 +214,11 @@ fin_construir_tablero:
 imprimir_tablero:
     mov     rdi, buffer
     mPuts
+    mov rdi, mensaje_ocas_eliminadas
+    mov rsi, [cantidad_ocas_eliminadas]
+    mPrintF
+    mov rdi, salto_linea
+    mPuts
     ret
 
 pedir_movimiento_zorro:
@@ -314,6 +328,9 @@ validar_comer_oca:
     ; Borrar la oca que fue comida
     sub rax, rdi
     mov byte [rax], 2
+    add qword [cantidad_ocas_eliminadas], 1 ;aumento en uno la cantidad de ocas eliminadas
+    cmp qword [cantidad_ocas_eliminadas], 12  ;si gana el zorro
+    je ganador_zorro
     mov byte [inputValido], 'S' ; Indicar que el movimiento fue válido
     ret
 
@@ -446,7 +463,16 @@ coordenadas_invalidas:
     mPuts
     ret
 
+ganador_zorro:
+    ; Imprimir el mensaje del ganador y finalizar el juego
+    mov rdi, mensaje_ganador
+    mov rsi, nombre_jugador1
+    mPrintF
+    jmp fin_juego
+
 fin_juego:
     mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
     mPuts
-    ret
+    mov     eax, 60                 ; syscall: exit
+    xor     edi, edi                ; status: 0
+    syscall    
