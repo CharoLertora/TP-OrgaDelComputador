@@ -264,6 +264,9 @@ zorro_encontrado:
     je mover_zorro_abajo_izquierda
     cmp al, 'x'
     je mover_zorro_abajo_derecha
+    mov rdi, msjErrorInput
+    mPuts
+    jmp turno_zorro
     ret
 
 mover_zorro_arriba:
@@ -385,23 +388,19 @@ mover_oca:
     mov rsi, tablero
     ; Calcular la posición en el tablero
     mov rbx, [posicion_oca]
-
     ; Leer la dirección de movimiento
     mov rdi, input_oca
     mov al, [rdi]
-    cmp al, 'w'
-    je mover_oca_arriba
     cmp al, 's'
     je mover_oca_abajo
     cmp al, 'a'
     je mover_oca_izquierda
     cmp al, 'd'
     je mover_oca_derecha
+    mov rdi, msjErrorInput
+    mPuts
+    jmp turno_ocas
     ret
-
-mover_oca_arriba:
-    sub rbx, 7
-    jmp validar_movimiento_oca
 
 mover_oca_abajo:
     add rbx, 7
