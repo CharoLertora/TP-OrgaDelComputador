@@ -28,7 +28,7 @@ section .data
                 db  -1, -1,  1,  1,  1, -1, -1
                 db   1,  1,  1,  1,  1,  1,  1
                 db   1,  2,  2,  2,  2,  2,  1
-                db   1,  2,  2,  3,  1,  2,  1
+                db   1,  2,  2,  3,  2,  2,  1
                 db  -1, -1,  2,  2,  2, -1, -1
                 db  -1, -1,  2,  2,  2, -1, -1
 
@@ -49,7 +49,7 @@ section .data
     mensaje_ganador             db "El ganador es: %s ", 0
     mensaje_fin_juego           db "El juego ha sido abandonado.", 0
     mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli", 0
-    cantidad_ocas_eliminadas    dq 0
+    cantidad_ocas_eliminadas    dq 11
 
 section .bss
     buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
@@ -84,6 +84,11 @@ loop_juego:
     je turno_ocas           ; si es el turno de las ocas, voy a la etiqueta turno_ocas
 
 turno_zorro:
+    sub     rsp,8
+    call    verificar_movimientos_zorro  ; Verifico si el zorro tiene movimientos disponibles
+    add     rsp,8
+    cmp     byte [inputValido], 'N'  ; Si no tiene movimientos válidos, las ocas ganan
+    je      ganador_ocas
     sub     rsp,8
     call    pedir_movimiento_zorro  ;llamo a la subrutina para pedir movimiento del zorro
     add     rsp,8
@@ -356,6 +361,120 @@ movimiento_invalido_zorro:
     mPuts
     ret
 
+verificar_movimientos_zorro:
+    mov rsi, tablero
+    mov rcx, 49
+
+buscar_zorro_verificacion_mov:
+    lodsb
+    cmp al, 3
+    je zorro_encontrado_verificar
+    loop buscar_zorro_verificacion_mov
+    ret
+
+zorro_encontrado_verificar:
+    mov rbx, rsi   ; Mueve el valor del registro rsi (posición actual del zorro) a rbx
+    dec rbx         ; Decrementa rbx en 1 para apuntar correctamente a la posición actual del zorro
+
+    ; Verificar todas las direcciones alrededor del zorro (cercanas)
+    mov rdi, rbx
+    sub rdi, 7
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    add rdi, 7
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    dec rdi
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    inc rdi
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    sub rdi, 6
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    sub rdi, 8
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    add rdi, 6
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    add rdi, 8
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    ; Verificar las posiciones más alejadas (dos espacios en cada dirección)
+    mov rdi, rbx
+    sub rdi, 14  ; dos espacios hacia arriba-izquierda
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    sub rdi, 12  ; dos espacios hacia arriba-derecha
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    add rdi, 12  ; dos espacios hacia abajo-izquierda
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    add rdi, 14  ; dos espacios hacia abajo-derecha
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    sub rdi, 14  ; dos espacios hacia arriba
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    mov rdi, rbx
+    add rdi, 14  ; dos espacios hacia abajo
+    call verificar_casillero
+    cmp byte [inputValido], 'S'
+    je movimiento_valido
+
+    ; Si no hay movimientos válidos
+    mov byte [inputValido], 'N'
+    ret
+
+verificar_casillero:
+    cmp byte [rdi], 2  ; Verificar si el casillero es vacío (2)
+    je movimiento_valido
+    ret
+
+movimiento_valido:
+    mov byte [inputValido], 'S'
+    ret
+
 pedir_movimiento_oca:
     mov rdi, mensaje_mover_oca
     mPuts
@@ -482,10 +601,16 @@ ganador_zorro:
     mPrintF
     jmp fin_juego
 
+ganador_ocas:
+    ; Imprimir el mensaje del ganador (ocas) y finalizar el juego
+    mov rdi, mensaje_ganador
+    mov rsi, nombre_jugador2
+    mPrintF
+    jmp fin_juego
+
 fin_juego:
     mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
     mPuts
     mov     eax, 60                 ; syscall: exit
     xor     edi, edi                ; status: 0
     syscall
-
