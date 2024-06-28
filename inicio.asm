@@ -34,8 +34,8 @@ section .data
 
     salto_linea                 db 10, 0        
     simbolo_fuera_tablero       db ".", 0
-    simbolo_oca                 db 'O', 0
-    simbolo_zorro               db 'X', 0
+    simbolo_oca                 db 'O', 0    ; symbolo por default para ocas
+    simbolo_zorro               db 'X', 0    ; symbolo por default para el zorro
     simbolo_espacio_vacio       db ' ', 0
     simbolo_separador           db '|', 0
     mensaje_mover_oca           db "Ingrese la fila y columna de la oca a mover (ejemplo: 3 3). Presione f para salir de la partida: ", 0
@@ -46,6 +46,8 @@ section .data
     mensaje_mov_invalido        db "Movimiento invalido, intente nuevamente", 0
     mensaje_ingresar_j1         db "Ingrese el nombre del jugador 1 (zorro): ", 0
     mensaje_ingresar_j2         db "Ingrese el nombre del jugador 2 (ocas): ", 0
+    mensaje_ingresar_simbolo_zorro db "Ingrese el simbolo para el zorro (presione Enter para usar 'X'): ", 0
+    mensaje_ingresar_simbolo_oca db "Ingrese el simbolo para las ocas (presione Enter para usar 'O'): ", 0
     mensaje_ganador             db "El ganador es: %s ", 0
     mensaje_fin_juego           db "El juego ha sido abandonado.", 0
     mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli", 0
@@ -67,7 +69,7 @@ section .bss
 section .text
 main:
     sub     rsp,8
-    call    ingresar_nombres_jugadores        ;llamo a la subrutina para ingresar nombres
+    call    ingresar_nombres_y_simbolos_jugadores  ;llamo a la subrutina para ingresar nombres y simbolos
     add     rsp,8
     sub     rsp,8
     call    construir_tablero       ;llamo a la subrutina para construir el tablero inicial
@@ -123,16 +125,34 @@ continuar_juego:
 
     ret
 
-ingresar_nombres_jugadores:
+ingresar_nombres_y_simbolos_jugadores:
     mov     rdi, mensaje_ingresar_j1   
     mPuts
     mov     rdi, nombre_jugador1              ; guardo el nombre de cada jugador
     mGets
-    mov rdi, mensaje_ingresar_j2
+    mov     rdi, mensaje_ingresar_j2
     mPuts
-    mov rdi, nombre_jugador2
+    mov     rdi, nombre_jugador2
     mGets
+    mov     rdi, mensaje_ingresar_simbolo_zorro
+    mPuts
+    mov     rdi, simbolo_zorro
+    mov     rsi, simbolo_zorro
+    mGets
+    cmp     byte [simbolo_zorro], 0   ; verifico si se presiono enter
+    jne     skip_default_zorro        ; si no es enter, se utiliza el del usuario que se guardo en simbolo_zorro
+    mov     byte [simbolo_zorro], 'X' ; se asigna el símbolo por defecto para el zorro, pisando en caso de enter
+skip_default_zorro:
+    mov     rdi, mensaje_ingresar_simbolo_oca
+    mPuts
+    mov     rdi, simbolo_oca
+    mov     rsi, simbolo_oca
+    mGets
+    cmp     byte [simbolo_oca], 0     ; verifico si se presiono enter
+    jne     skip_default_oca          ; si no es enter, se utiliza el del usuario que se guardo en simbolo_oca
+    mov     byte [simbolo_oca], 'O'   ; se asigna el símbolo por defecto para las ocas, pisando en caso de enter
 
+skip_default_oca:
     mov byte [turno], 1  ; Comienza el turno del zorro
     ret
 
