@@ -60,6 +60,7 @@ section .data
     msgErrorConvirt     db      "Error convirtiendo el numero",10,0
     msgErrorEscritura   db      "Error escribiendo el archivo",10,0
     msgPartidaGuardada  db      "Se ha encontrado una partida guardada, desea continuarla? (si/no)",10,0
+    msgGuardarPartida   db      "Estás saliendo del juego, querés guardar tu partida? (si/no)",10,0
     respuestaSi         db      "si",0
     registro            times 51  db  " "
     tableroStr          times 51  db  " "
@@ -135,7 +136,7 @@ turno_zorro:
     call    pedir_movimiento_zorro  ;llamo a la subrutina para pedir movimiento del zorro
     add     rsp,8
     cmp     byte [input_zorro], 'f' ; Verificar si se desea abandonar la partida
-    je      fin_juego
+    je      guardar_partida
     sub     rsp,8
     call    mover_zorro              ;llamo a la subrutina para mover al zorro
     add     rsp,8
@@ -149,7 +150,7 @@ turno_ocas:
     call    pedir_movimiento_oca     ;llamo a la subrutina para pedir movimiento de la oca
     add     rsp,8
     cmp     byte [input_oca], 'f'    ; Verificar si se desea abandonar la partida
-    je      fin_juego
+    je      guardar_partida
     sub     rsp,8
     call    mover_oca                ;llamo a la subrutina para mover la oca
     add     rsp,8
@@ -476,21 +477,40 @@ coordenadas_invalidas:
     ret
 
 errorApertura:
-  mov   rdi, msgErrorAp
-  mPuts
-  jmp   fin_juego
+    mov   rdi, msgErrorAp
+    mPuts
+    jmp   fin_juego
 
 errorLeyendoArchivo:
-  mov   rdi, msgErrorLectura
-  mPuts
-  jmp   continuar_jugando
+    mov   rdi, msgErrorLectura
+    mPuts
+    jmp   continuar_jugando
 
 errorEscritura:
-  mov   rdi, msgErrorEscritura
-  mPuts
-  jmp   fin_juego
+    mov   rdi, msgErrorEscritura
+    mPuts
+    jmp   fin_juego
 
+guardar_partida:
+    call    abrirEscrituraArchivo
+
+    mov     rdi, msgGuardarPartida
+    mPuts
+    mov     rdi, respuestaPartidaGuardada
+    mGets
+    mov     rcx, 2
+    lea     rsi, [respuestaSi]
+    lea     rdi, [respuestaPartidaGuardada]
+    repe    cmpsb
+    jne     fin_juego
+
+    call    convertirTableroAStr
+    call    escribirArchivo
+    cmp     rax, 0
+    jle     errorEscritura
 fin_juego:
+    call    cerrarArchivo
+
     mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
     mPuts
 ret
