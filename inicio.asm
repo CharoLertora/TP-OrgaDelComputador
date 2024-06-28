@@ -15,15 +15,20 @@ global main
 extern puts
 extern gets
 extern sscanf
+extern fopen
+extern fgets
+extern printf
+extern fputs
+extern fclose
 
 section .data
-    tablero     db  -1, -1,  1,  1,  1, -1, -1
-                db  -1, -1,  1,  1,  1, -1, -1
-                db   1,  1,  1,  1,  1,  1,  1
-                db   1,  2,  2,  2,  2,  2,  1
-                db   1,  2,  2,  3,  2,  2,  1
-                db  -1, -1,  2,  2,  2, -1, -1
-                db  -1, -1,  2,  2,  2, -1, -1
+    tablero     db  0, 0, 1, 1, 1, 0, 0
+                db  0, 0, 1, 1, 1, 0, 0
+                db  1, 1, 1, 1, 1, 1, 1
+                db  1, 2, 2, 2, 2, 2, 1
+                db  1, 2, 2, 3, 2, 2, 1
+                db  0, 0, 2, 2, 2, 0, 0
+                db  0, 0, 2, 2, 2, 0, 0
 
     salto_linea                 db 10, 0        
     simbolo_fuera_tablero       db ".", 0
@@ -44,6 +49,24 @@ section .data
     mensaje_ganador                     db "El ganador es: ", 0
     mensaje_fin_juego                   db "El juego ha sido abandonado.", 0
     
+    ;Variables de archivo
+    archivo             db      "tablero.txt",0
+    modoAperturaRead    db      "r",0   ; Abro y leo un archivo de texto
+    modoAperturaWrite   db      "w+",0
+
+    msgErrorAp          db      "Lo sentimos, no se pudo abrir el archivo.",10,0
+    msgErrorLectura     db      "No se encontró una partida guardada, se iniciará una nueva.",10,0
+    msgLeido            db      "Leído con éxito.",10,0
+    msgErrorConvirt     db      "Error convirtiendo el numero",10,0
+    msgErrorEscritura   db      "Error escribiendo el archivo",10,0
+    msgPartidaGuardada  db      "Se ha encontrado una partida guardada, desea continuarla? (si/no)",10,0
+    respuestaSi         db      "si",0
+    registro            times 51  db  " "
+    tableroStr          times 51  db  " "
+
+    CANT_FIL_COL        equ   7
+    DESPLAZ_LIMITE      equ   48
+
 section .bss
     buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
     input_oca       resb 10
@@ -56,14 +79,46 @@ section .bss
     nombre_jugador2 resb 50
     turno           resb 1
 
+    ;Variables de archivo
+    handleArch                  resq  1
+    numero                      resb  1
+    posicionVect                resb  1
+    posicionMatFil              resb  1
+    posicionMatCol              resb  1
+    respuestaPartidaGuardada    resb  4
+
 section .text
 main:
+    
+    call    abrirLecturaArchivo
+    cmp     rax, 0
+    jle     errorApertura
+        
+    call    leerArchivo  
+    cmp     rax, 0
+    jle     errorLeyendoArchivo
+
+    mov     rdi, msgPartidaGuardada
+    mPuts
+    mov     rdi, respuestaPartidaGuardada
+    mGets
+    mov     rcx, 2
+    lea     rsi, [respuestaSi]
+    lea     rdi, [respuestaPartidaGuardada]
+    repe    cmpsb
+    jne     continuar_jugando
+    call    copiarRegistroATablero
+    call    cerrarArchivo
+
+continuar_jugando:
     sub     rsp,8
     call    ingresar_nombres_jugadores        ;llamo a la subrutina para ingresar nombres
     add     rsp,8
+
     sub     rsp,8
     call    construir_tablero       ;llamo a la subrutina para construir el tablero inicial
     add     rsp,8
+
     sub     rsp,8
     call    imprimir_tablero        ;llamo a la subrutina para imprimir el tablero
     add     rsp,8
@@ -141,7 +196,7 @@ imprimir_siguiente_caracter:
     mov     rsi, tablero
     add     rsi, rax          ; rsi apunta a la posición actual en el tablero
 
-    cmp     byte [rsi], -1      ;segun el numero en tablero imprimo un caracter distinto
+    cmp     byte [rsi], 0      ;segun el numero en tablero imprimo un caracter distinto
     je      imprimir_fuera_tablero                
     cmp     byte [rsi], 2           
     je      imprimir_espacio_vacio              
@@ -420,7 +475,175 @@ coordenadas_invalidas:
     mPuts
     ret
 
+errorApertura:
+  mov   rdi, msgErrorAp
+  mPuts
+  jmp   fin_juego
+
+errorLeyendoArchivo:
+  mov   rdi, msgErrorLectura
+  mPuts
+  jmp   continuar_jugando
+
+errorEscritura:
+  mov   rdi, msgErrorEscritura
+  mPuts
+  jmp   fin_juego
+
 fin_juego:
     mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
     mPuts
-    ret
+ret
+
+
+
+;---------  RUTINAS INTERNAS -----------
+abrirLecturaArchivo:
+  mov   rdi, archivo
+  mov   rsi, modoAperturaRead
+  call  fopen
+
+  mov   qword[handleArch],rax
+ret
+
+abrirEscrituraArchivo:
+  mov   rdi, archivo
+  mov   rsi, modoAperturaWrite
+  call  fopen
+
+  mov   qword[handleArch],rax
+ret
+
+leerArchivo:
+
+  mov   rdi, registro
+  mov   rsi, 51
+  mov   rdx, [handleArch]
+  call  fgets
+
+ret
+
+escribirArchivo:
+
+  mov   rdi, tableroStr
+  mov   rsi, [handleArch]
+  call  fputs
+ret
+
+cerrarArchivo:
+
+  mov   rdi, [handleArch]
+  call  fclose
+ret
+
+
+;---------------------------------
+copiarRegistroATablero:
+
+  mov   byte[posicionVect], 0
+  mov   byte[posicionMatFil], 1
+  mov   byte[posicionMatCol], 1
+
+recorroReg:
+
+  cmp   byte[posicionVect], 49
+  jge    finalizoCopia
+
+  mov   al, byte[posicionVect]
+  cbw
+  cwde
+  cdqe
+  mov   cl,[registro+rax]
+  sub   cl, '0'
+  mov   [numero], cl
+
+  ; Agrego el nro a la matriz
+  
+  mov   al, byte[posicionMatFil] 
+  cbw
+  cwde
+  cdqe
+  dec   rax
+  imul  rax, CANT_FIL_COL
+
+  mov   rcx, rax
+
+  mov   al, byte[posicionMatCol]
+  cbw
+  cwde
+  cdqe
+  dec   rax
+  
+  add   rcx, rax      ; Desplazamiento en matriz
+
+  mov   al, byte[numero]
+  mov   [tablero+rcx], al
+
+avanzarColumna:
+  inc   byte[posicionMatCol]
+  cmp   byte[posicionMatCol], CANT_FIL_COL
+  jg    avanzarFila
+  jmp   sigoEnVector
+
+avanzarFila:
+  mov   byte[posicionMatCol], 1
+  inc   byte[posicionMatFil]
+  cmp   byte[posicionMatFil], CANT_FIL_COL
+  jg    finalizoCopia
+
+sigoEnVector:
+  add   byte[posicionVect], 1
+  jmp   recorroReg
+
+finalizoCopia:
+ret
+
+
+
+convertirTableroAStr:
+  mov   byte[posicionMatFil], 1
+  mov   byte[posicionMatCol], 1
+
+continuoCopiaStr:
+  mov   al, byte[posicionMatFil] 
+  cbw
+  cwde
+  cdqe
+  dec   rax
+  imul  rax, CANT_FIL_COL
+
+  mov   rcx, rax
+
+  mov   al, byte[posicionMatCol]
+  cbw
+  cwde
+  cdqe
+  dec   rax
+  
+  add   rcx, rax      ; Desplazamiento en matriz
+  cmp   rcx, DESPLAZ_LIMITE
+  jg    finalizoCopiaStr
+
+  mov   al, [tablero+rcx]
+  add   al, 48
+  cbw
+  cwde
+  cdqe
+  mov   [tableroStr+rcx], rax
+
+avanzarColumnaStr:
+  inc   byte[posicionMatCol]
+  cmp   byte[posicionMatCol], CANT_FIL_COL
+  jg    avanzarFilaStr
+  jmp   continuoCopiaStr
+
+avanzarFilaStr:
+  mov   byte[posicionMatCol], 1
+  inc   byte[posicionMatFil]
+  cmp   byte[posicionMatFil], CANT_FIL_COL
+  jg    finalizoCopiaStr
+  jmp   continuoCopiaStr
+  
+finalizoCopiaStr:
+  mov   byte[tableroStr+49], 10 ;Agrego un salto de línea al final del archivo
+ret
