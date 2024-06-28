@@ -39,9 +39,9 @@ section .data
     simbolo_espacio_vacio       db ' ', 0
     simbolo_separador           db '|', 0
     mensaje_mover_oca           db "Ingrese la fila y columna de la oca a mover (ejemplo: 3 3). Presione f para salir de la partida: ", 0
-    mensaje_mover_oca_direccion db "Mueva la oca con w: arriba /a: izquierda /s: abajo /d: derecha. Presione f para salir de la partida: ", 0
+    mensaje_mover_oca_direccion db "Mueva la oca con a: izquierda /s: abajo /d: derecha. Presione f para salir de la partida: ", 0
     formatInputFilCol           db "%hhu %hhu", 0                               ; Formato para leer enteros de 1 byte
-    msjErrorInput               db "Los datos ingresados son inválidos. Intente nuevamente.", 0
+    mensaje_error_input         db "Los datos ingresados son inválidos. Intente nuevamente.", 0
     mensaje_mover_zorro         db "Mueva el zorro con w: arriba /a: izquierda /s: abajo /d: derecha /e: arriba-derecha /q: arriba-izquierda /z: abajo-izquierda /x: abajo-derecha. Presione f para salir de la partida: ", 0
     mensaje_mov_invalido        db "Movimiento invalido, intente nuevamente", 0
     mensaje_ingresar_j1         db "Ingrese el nombre del jugador 1 (zorro): ", 0
@@ -49,14 +49,14 @@ section .data
     mensaje_ganador             db "El ganador es: %s ", 0
     mensaje_fin_juego           db "El juego ha sido abandonado.", 0
     mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli", 0
-    cantidad_ocas_eliminadas    dq 11
+    cantidad_ocas_eliminadas    dq 0
 
 section .bss
     buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
     input_oca       resb 10
     fila            resb 1
     columna         resb 1
-    inputValido     resb 1
+    input_valido    resb 1
     posicion_oca    resq 1
     input_zorro     resb 10
     nombre_jugador1 resb 50
@@ -87,7 +87,7 @@ turno_zorro:
     sub     rsp,8
     call    verificar_movimientos_zorro  ; Verifico si el zorro tiene movimientos disponibles
     add     rsp,8
-    cmp     byte [inputValido], 'N'  ; Si no tiene movimientos válidos, las ocas ganan
+    cmp     byte [input_valido], 'N'  ; Si no tiene movimientos válidos, las ocas ganan
     je      ganador_ocas
     sub     rsp,8
     call    pedir_movimiento_zorro  ;llamo a la subrutina para pedir movimiento del zorro
@@ -97,7 +97,7 @@ turno_zorro:
     sub     rsp,8
     call    mover_zorro              ;llamo a la subrutina para mover al zorro
     add     rsp,8
-    cmp     byte [inputValido], 'R'  ;comparo si el movimiento del zorro fue inválido
+    cmp     byte [input_valido], 'R'  ;comparo si el movimiento del zorro fue inválido
     je      turno_zorro              ;si fue inválido, vuelvo a pedir movimiento del zorro
     cmp     byte [comio_oca], 1      ; Si comió una oca, no cambiar de turno
     je      continuar_juego
@@ -113,7 +113,7 @@ turno_ocas:
     sub     rsp,8
     call    mover_oca                ;llamo a la subrutina para mover la oca
     add     rsp,8
-    cmp     byte [inputValido], 'R'  ;comparo si el movimiento de la oca fue inválido
+    cmp     byte [input_valido], 'R'  ;comparo si el movimiento de la oca fue inválido
     je      turno_ocas               ;si fue inválido, vuelvo a pedir movimiento de la oca
     mov     byte [turno], 1          ;si fue válido, cambio el turno al zorro
 
@@ -147,10 +147,10 @@ construir_tablero:
     mov     rdi, buffer       ; Apuntar al inicio del buffer
 
 imprimir_siguiente_caracter:   
-    mov     rax, rbx
+    mov     rax, rbx           ;i
     dec     rax
     imul    rax, rax, 7       ; (i-1) * longfila
-    mov     rdx, r10
+    mov     rdx, r10          ;j
     dec     rdx
     add     rax, rdx          ; (i-1) * longfila + (j-1)
     mov     rsi, tablero
@@ -167,7 +167,7 @@ imprimir_siguiente_caracter:
 
 imprimir_fuera_tablero:
     mov     al, [simbolo_separador]
-    stosb
+    stosb                               ;almaceno e incremento el rdi
     mov     al, [simbolo_fuera_tablero]
     stosb
     mov     al, [simbolo_separador]
@@ -241,7 +241,7 @@ mover_zorro:
     mov rcx, 49
 
 buscar_zorro:
-    lodsb
+    lodsb       ;apunto al siguiente y lo cargo en al
     cmp al, 3
     je zorro_encontrado
     loop buscar_zorro
@@ -269,7 +269,7 @@ zorro_encontrado:
     je mover_zorro_abajo_izquierda
     cmp al, 'x'
     je mover_zorro_abajo_derecha
-    mov rdi, msjErrorInput
+    mov rdi, mensaje_error_input
     mPuts
     jmp turno_zorro
     ret
@@ -320,7 +320,7 @@ validar_movimiento_zorro:
     mov byte [rsi - 1], 2       ; Actualizar la posición anterior del zorro con 2 (vacío)
     mov byte [rbx], 3           ; Colocar al zorro en la nueva posición
     mov byte [comio_oca], 0     ; Indicar que no comió oca
-    mov byte [inputValido], 'S' ; Indicar que el movimiento fue válido
+    mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
     ret
 
 verificar_si_oca:
@@ -330,7 +330,7 @@ verificar_si_oca:
 
 validar_comer_oca:
     ; Verificar si hay una oca en la posición intermedia
-    ; RDI contiene la dirección del desplazamiento en mover_zorro_*
+    ; RDI contiene la dirección del desplazamiento
     mov rax, rbx
     add rax, rdi
     cmp byte [rax], 2           ; Verificar si la posición de salto está vacía
@@ -344,7 +344,7 @@ validar_comer_oca:
     add qword [cantidad_ocas_eliminadas], 1 ;aumento en uno la cantidad de ocas eliminadas
     cmp qword [cantidad_ocas_eliminadas], 12  ;si gana el zorro
     je ganador_zorro
-    mov byte [inputValido], 'S' ; Indicar que el movimiento fue válido
+    mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
     mov byte [comio_oca], 1     ; Indicar que el zorro comió una oca
     ; Reconstruir e imprimir el tablero para reflejar el estado actual
     sub     rsp,8
@@ -356,7 +356,7 @@ validar_comer_oca:
     jmp turno_zorro             ; Continuar el turno del zorro
 
 movimiento_invalido_zorro:
-    mov byte [inputValido], 'R'
+    mov byte [input_valido], 'R'
     mov rdi, mensaje_mov_invalido
     mPuts
     ret
@@ -380,90 +380,90 @@ zorro_encontrado_verificar:
     mov rdi, rbx
     sub rdi, 7
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     add rdi, 7
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     dec rdi
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     inc rdi
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     sub rdi, 6
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     sub rdi, 8
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     add rdi, 6
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     add rdi, 8
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     ; Verificar las posiciones más alejadas (dos espacios en cada dirección)
     mov rdi, rbx
     sub rdi, 14  ; dos espacios hacia arriba-izquierda
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     sub rdi, 12  ; dos espacios hacia arriba-derecha
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     add rdi, 12  ; dos espacios hacia abajo-izquierda
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     add rdi, 14  ; dos espacios hacia abajo-derecha
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     sub rdi, 14  ; dos espacios hacia arriba
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     mov rdi, rbx
     add rdi, 14  ; dos espacios hacia abajo
     call verificar_casillero
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je movimiento_valido
 
     ; Si no hay movimientos válidos
-    mov byte [inputValido], 'N'
+    mov byte [input_valido], 'N'
     ret
 
 verificar_casillero:
@@ -472,7 +472,7 @@ verificar_casillero:
     ret
 
 movimiento_valido:
-    mov byte [inputValido], 'S'
+    mov byte [input_valido], 'S'
     ret
 
 pedir_movimiento_oca:
@@ -486,10 +486,10 @@ pedir_movimiento_oca:
     sub rsp,8
     call validar_coordenadas_oca
     add rsp,8
-    cmp byte [inputValido], 'S'
+    cmp byte [input_valido], 'S'
     je pedir_direccion_oca
 
-    mov rdi, msjErrorInput
+    mov rdi, mensaje_error_input
     mPuts
     sub rsp,8
     call pedir_movimiento_oca
@@ -516,7 +516,7 @@ mover_oca:
     je mover_oca_izquierda
     cmp al, 'd'
     je mover_oca_derecha
-    mov rdi, msjErrorInput
+    mov rdi, mensaje_error_input
     mPuts
     jmp turno_ocas
     ret
@@ -539,17 +539,17 @@ validar_movimiento_oca:
     mov rsi, [posicion_oca]
     mov byte [rsi], 2          ; Actualizar la posición anterior de la oca con 2 (vacío)
     mov byte [rbx], 1          ; Colocar la oca en la nueva posición
-    mov byte [inputValido], 'S' ; Indicar que el movimiento fue válido
+    mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
     ret
 
 movimiento_invalido_oca:
-    mov byte [inputValido], 'R'
+    mov byte [input_valido], 'R'
     mov rdi, mensaje_mov_invalido
     mPuts
     ret
 
 validar_coordenadas_oca:
-    mov byte [inputValido], 'N'
+    mov byte [input_valido], 'N'
     mov rdi, input_oca
     mov rsi, formatInputFilCol
     mov rdx, fila
@@ -572,25 +572,25 @@ validar_coordenadas_oca:
     jg coordenadas_invalidas
 
     ; Calcular la posición en el tablero
-    movzx ax, byte [fila]
-    sub ax, 1
-    imul ax, 7
-    movzx dx, byte [columna]
-    sub dx, 1
-    add ax, dx
-    mov rbx, rax
-    add rbx, tablero
+    movzx ax, byte [fila]   ;cargo en ax la fila
+    sub ax, 1               ;para indexar en 0 
+    imul ax, 7              ;desplazamiento en fila
+    movzx dx, byte [columna]    ;cargo en dx la columna
+    sub dx, 1   
+    add ax, dx              ;desplazamiento total
+    mov rbx, rax    
+    add rbx, tablero          ;posicion en el tablero
 
     ; Verificar si hay una oca en la posición ingresada
     cmp byte [rbx], 1
     jne coordenadas_invalidas
 
-    mov byte [inputValido], 'S'
+    mov byte [input_valido], 'S'
     mov [posicion_oca], rbx    ; Guardar la posición de la oca
     ret
 
 coordenadas_invalidas:
-    mov rdi, msjErrorInput
+    mov rdi, mensaje_error_input
     mPuts
     ret
 
