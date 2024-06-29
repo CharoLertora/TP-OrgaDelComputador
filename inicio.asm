@@ -58,16 +58,6 @@ section .data
     mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli", 0
     cantidad_ocas_eliminadas    dq 0
 
-    mensaje_mover_oca                   db "Ingrese la fila y columna de la oca a mover (ejemplo: 3 3). Presione f para salir de la partida: ", 0
-    mensaje_mover_oca_direccion         db "Mueva la oca con w: arriba /a: izquierda /s: abajo /d: derecha. Presione f para salir de la partida: ", 0
-    formatInputFilCol                   db "%hhu %hhu", 0                               ; Formato para leer enteros de 1 byte
-    msjErrorInput                       db "Los datos ingresados son inválidos. Intente nuevamente.", 0
-    mensaje_mover_zorro                 db "Mueva el zorro con w: arriba /a: izquierda /s: abajo /d: derecha /e: arriba-derecha /q: arriba-izquierda /z: abajo-izquierda /x: abajo-derecha. Presione f para salir de la partida: ", 0
-    mensaje_mov_invalido                db "Movimiento invalido, intente nuevamente", 0
-    mensaje_ingresar_j1                 db "Ingrese el nombre del jugador 1 (zorro): ", 0
-    mensaje_ingresar_j2                 db "Ingrese el nombre del jugador 2 (ocas): ", 0
-    mensaje_ganador                     db "El ganador es: ", 0
-    mensaje_fin_juego                   db "El juego ha sido abandonado.", 0
     
     ;Variables de archivo
     archivoTablero              db      "tablero.txt",0
@@ -88,8 +78,8 @@ section .data
     
     estadisticas      times 0   db      ''
         turnoGuardado           db      " "
-        cantOcasComidas         db      " "
-
+        cantOcasEliminadas      db      " "
+        
 
     CANT_FIL_COL        equ     7
     DESPLAZ_LIMITE      equ     48
@@ -111,7 +101,8 @@ section .bss
     comio_oca       resb 1
 
     ;Variables de archivo
-    handleArch                  resq  1
+    handleArchTablero           resq  1
+    handleArchEstadisticas      resq  1
     numero                      resb  1
     posicionVect                resb  1
     posicionMatFil              resb  1
@@ -120,8 +111,9 @@ section .bss
 
 section .text
 main:
+    mov     byte[turno], TURNO_ZORRO
     mov     rdi, archivoTablero
-    call    abrirLecturaArchivo
+    call    abrirLecturaArchivoTablero
     cmp     rax, 0
     jle     errorApertura
         
@@ -139,9 +131,18 @@ main:
     repe    cmpsb
     jne     continuar_jugando
     call    copiarRegistroATablero
-    call    cerrarArchivo
+    call    cerrarArchivoTablero
 
+    mov     rdi, archivoEstadisticas
+    call    abrirLecturaArchivoEstadisticas
+    cmp     rax, 0
+    jle     errorApertura
+
+    call    leerArchivoEstadisticas
+    cmp     rax, 0
+    jle     errorLeyendoArchivo
     call    cargarEstadisticas
+    call    cerrarArchivoEstadisticas
 
 continuar_jugando:
     sub     rsp,8
@@ -232,12 +233,12 @@ skip_default_zorro:
     mov     rsi, simbolo_oca
     mGets
     cmp     byte [simbolo_oca], 0     ; verifico si se presiono enter
-    jne     skip_default_oca          ; si no es enter, se utiliza el del usuario que se guardo en simbolo_oca
+    jne     construir_tablero          ; si no es enter, se utiliza el del usuario que se guardo en simbolo_oca
     mov     byte [simbolo_oca], 'O'   ; se asigna el símbolo por defecto para las ocas, pisando en caso de enter
 
-skip_default_oca:
-    mov byte [turno], TURNO_ZORRO  ; Comienza el turno del zorro
-    ret
+;skip_default_oca:
+;    mov byte [turno], TURNO_ZORRO  ; Comienza el turno del zorro
+;    ret
 
 construir_tablero:
     mov     rbx, 1            ; i que será la fila, iniciada en 1 y no aumenta hasta no terminar las 7 columnas
@@ -579,7 +580,7 @@ pedir_movimiento_oca:
     mov rdi, input_oca
     mGets
     cmp byte [input_oca], 'f'    ; Verificar si se desea abandonar la partida
-    je fin_juego
+    je guardar_partida
     ; Validar las coordenadas de la oca
     sub rsp,8
     call validar_coordenadas_oca
@@ -709,7 +710,7 @@ errorEscritura:
 
 guardar_partida:
     mov     rdi, archivoTablero
-    call    abrirEscrituraArchivo
+    call    abrirEscrituraArchivoTablero
 
     mov     rdi, msgGuardarPartida
     mPuts
@@ -719,12 +720,23 @@ guardar_partida:
     lea     rsi, [respuestaSi]
     lea     rdi, [respuestaPartidaGuardada]
     repe    cmpsb
-    jne     fin_juego
+    jne     noGuardarPartida
 
     call    convertirTableroAStr
-    call    escribirArchivo
+    call    escribirArchivoTablero
     cmp     rax, 0
     jle     errorEscritura
+    call    cerrarArchivoTablero
+
+    mov     rdi, archivoEstadisticas
+    call    abrirEscrituraArchivoEstadisticas
+    call    convertirEstadisticasAStr
+    call    escribirArchivoEstadisticas
+    cmp     rax, 0
+    jle     errorEscritura
+    call    cerrarArchivoEstadisticas
+
+    jmp     fin_juego
 ganador_zorro:
     ; Imprimir el mensaje del ganador y finalizar el juego
     mov rdi, mensaje_ganador
@@ -739,8 +751,13 @@ ganador_ocas:
     mPrintF
     jmp fin_juego
 
+noGuardarPartida:
+    call    cerrarArchivoTablero
+    ;Hago esto para que el contenido del archivo se elimine por completo
+    mov     rdi, archivoEstadisticas
+    call    abrirEscrituraArchivoEstadisticas
+    call    cerrarArchivoEstadisticas
 fin_juego:
-    call    cerrarArchivo
 
     mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
     mPuts
@@ -752,102 +769,136 @@ ret
 
 
 ;---------  RUTINAS INTERNAS -----------
-abrirLecturaArchivo:
+abrirLecturaArchivoTablero:
   
-  mov   rsi, modoAperturaRead
-  call  fopen
+    mov   rsi, modoAperturaRead
+    call  fopen
 
-  mov   qword[handleArch],rax
+    mov   qword[handleArchTablero],rax
 ret
 
-abrirEscrituraArchivo:
+abrirLecturaArchivoEstadisticas:
   
-  mov   rsi, modoAperturaWrite
-  call  fopen
+    mov   rsi, modoAperturaRead
+    call  fopen
 
-  mov   qword[handleArch],rax
+    mov   qword[handleArchEstadisticas],rax
+ret
+
+abrirEscrituraArchivoTablero:
+  
+    mov   rsi, modoAperturaWrite
+    call  fopen
+
+    mov   qword[handleArchTablero],rax
+ret
+
+
+abrirEscrituraArchivoEstadisticas:
+  
+    mov   rsi, modoAperturaWrite
+    call  fopen
+
+    mov   qword[handleArchEstadisticas],rax
 ret
 
 leerArchivoTablero:
 
-  mov   rdi, registro
-  mov   rsi, 51
-  mov   rdx, [handleArch]
-  call  fgets
+    mov   rdi, registro
+    mov   rsi, 51
+    mov   rdx, [handleArchTablero]
+    call  fgets
 
 ret
 
-escribirArchivo:
+leerArchivoEstadisticas:
+    mov     rdi, estadisticas
+    mov     rsi, 3
+    mov     rdx, [handleArchEstadisticas]
+    call    fgets
 
-  mov   rdi, tableroStr
-  mov   rsi, [handleArch]
-  call  fputs
+escribirArchivoTablero:
+
+    mov   rdi, tableroStr
+    mov   rsi, [handleArchTablero]
+    call  fputs
 ret
 
-cerrarArchivo:
-
-  mov   rdi, [handleArch]
-  call  fclose
+escribirArchivoEstadisticas:
+    mov   rdi, estadisticas
+    mov   rsi, [handleArchEstadisticas]
+    call  fputs
 ret
 
+cerrarArchivoTablero:
+
+    mov   rdi, [handleArchTablero]
+    call  fclose
+ret
+
+cerrarArchivoEstadisticas:
+
+    mov   rdi, [handleArchEstadisticas]
+    call  fclose
+ret
 
 ;---------------------------------
 copiarRegistroATablero:
 
-  mov   byte[posicionVect], 0
-  mov   byte[posicionMatFil], 1
-  mov   byte[posicionMatCol], 1
+    mov   byte[posicionVect], 0
+    mov   byte[posicionMatFil], 1
+    mov   byte[posicionMatCol], 1
 
 recorroReg:
 
-  cmp   byte[posicionVect], 49
-  jge    finalizoCopia
+    cmp   byte[posicionVect], 49
+    jge    finalizoCopia
 
-  mov   al, byte[posicionVect]
-  cbw
-  cwde
-  cdqe
-  mov   cl,[registro+rax]
-  sub   cl, '0'
-  mov   [numero], cl
+    mov   al, byte[posicionVect]
+    cbw
+    cwde
+    cdqe
+    mov   cl,[registro+rax]
+    sub   cl, '0'
+    mov   [numero], cl
 
-  ; Agrego el nro a la matriz
-  
-  mov   al, byte[posicionMatFil] 
-  cbw
-  cwde
-  cdqe
-  dec   rax
-  imul  rax, CANT_FIL_COL
+    ; Agrego el nro a la matriz
+    
+    mov   al, byte[posicionMatFil] 
+    cbw
+    cwde
+    cdqe
+    dec   rax
+    imul  rax, CANT_FIL_COL
 
-  mov   rcx, rax
+    mov   rcx, rax
 
-  mov   al, byte[posicionMatCol]
-  cbw
-  cwde
-  cdqe
-  dec   rax
-  
-  add   rcx, rax      ; Desplazamiento en matriz
+    mov   al, byte[posicionMatCol]
+    cbw
+    cwde
+    cdqe
+    dec   rax
+    
+    add   rcx, rax      ; Desplazamiento en matriz
 
-  mov   al, byte[numero]
-  mov   [tablero+rcx], al
+    mov   al, byte[numero]
+    mov   [tablero+rcx], al
 
 avanzarColumna:
-  inc   byte[posicionMatCol]
-  cmp   byte[posicionMatCol], CANT_FIL_COL
-  jg    avanzarFila
-  jmp   sigoEnVector
+    inc   byte[posicionMatCol]
+    cmp   byte[posicionMatCol], CANT_FIL_COL
+    jg    avanzarFila
+    jmp   sigoEnVector
 
 avanzarFila:
-  mov   byte[posicionMatCol], 1
-  inc   byte[posicionMatFil]
-  cmp   byte[posicionMatFil], CANT_FIL_COL
-  jg    finalizoCopia
+    mov   byte[posicionMatCol], 1
+    inc   byte[posicionMatFil]
+    cmp   byte[posicionMatFil], CANT_FIL_COL
+    jg    finalizoCopia
 
 sigoEnVector:
-  add   byte[posicionVect], 1
-  jmp   recorroReg
+    add   byte[posicionVect], 1
+    jmp   recorroReg
 
 finalizoCopia:
 ret
@@ -855,53 +906,74 @@ ret
 
 
 convertirTableroAStr:
-  mov   byte[posicionMatFil], 1
-  mov   byte[posicionMatCol], 1
+    mov   byte[posicionMatFil], 1
+    mov   byte[posicionMatCol], 1
 
 continuoCopiaStr:
-  mov   al, byte[posicionMatFil] 
-  cbw
-  cwde
-  cdqe
-  dec   rax
-  imul  rax, CANT_FIL_COL
+    mov   al, byte[posicionMatFil] 
+    cbw
+    cwde
+    cdqe
+    dec   rax
+    imul  rax, CANT_FIL_COL
 
-  mov   rcx, rax
+    mov   rcx, rax
 
-  mov   al, byte[posicionMatCol]
-  cbw
-  cwde
-  cdqe
-  dec   rax
-  
-  add   rcx, rax      ; Desplazamiento en matriz
-  cmp   rcx, DESPLAZ_LIMITE
-  jg    finalizoCopiaStr
+    mov   al, byte[posicionMatCol]
+    cbw
+    cwde
+    cdqe
+    dec   rax
+    
+    add   rcx, rax      ; Desplazamiento en matriz
+    cmp   rcx, DESPLAZ_LIMITE
+    jg    finalizoCopiaStr
 
-  mov   al, [tablero+rcx]
-  add   al, 48
-  cbw
-  cwde
-  cdqe
-  mov   [tableroStr+rcx], rax
+    mov   al, [tablero+rcx]
+    add   al, 48
+    cbw
+    cwde
+    cdqe
+    mov   [tableroStr+rcx], rax
 
 avanzarColumnaStr:
-  inc   byte[posicionMatCol]
-  cmp   byte[posicionMatCol], CANT_FIL_COL
-  jg    avanzarFilaStr
-  jmp   continuoCopiaStr
+    inc   byte[posicionMatCol]
+    cmp   byte[posicionMatCol], CANT_FIL_COL
+    jg    avanzarFilaStr
+    jmp   continuoCopiaStr
 
 avanzarFilaStr:
-  mov   byte[posicionMatCol], 1
-  inc   byte[posicionMatFil]
-  cmp   byte[posicionMatFil], CANT_FIL_COL
-  jg    finalizoCopiaStr
-  jmp   continuoCopiaStr
-  
+    mov   byte[posicionMatCol], 1
+    inc   byte[posicionMatFil]
+    cmp   byte[posicionMatFil], CANT_FIL_COL
+    jg    finalizoCopiaStr
+    jmp   continuoCopiaStr
+    
 finalizoCopiaStr:
-  mov   byte[tableroStr+49], 10 ;Agrego un salto de línea al final del archivo
+    mov   byte[tableroStr+49], 10 ;Agrego un salto de línea al final del archivo
 ret
 
 
+
 cargarEstadisticas:
-    
+    mov     rcx, [turnoGuardado]
+    sub     rcx, 48
+    mov     [turno], rcx
+
+    mov     rcx, [cantOcasEliminadas]
+    sub     rcx, 48
+    mov     [cantidad_ocas_eliminadas], rcx
+ret
+
+convertirEstadisticasAStr:
+    mov     rcx, [turno]
+    add     rcx, 48
+    mov     [turnoGuardado], rcx
+
+    mov     rcx, [cantidad_ocas_eliminadas]
+    add     rcx, 48
+    mov     [cantOcasEliminadas], rcx
+
+    mov     byte[estadisticas+2], 10
+
+ret
