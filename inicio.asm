@@ -50,23 +50,32 @@ section .data
     mensaje_fin_juego                   db "El juego ha sido abandonado.", 0
     
     ;Variables de archivo
-    archivo             db      "tablero.txt",0
-    modoAperturaRead    db      "r",0   ; Abro y leo un archivo de texto
-    modoAperturaWrite   db      "w+",0
+    archivoTablero              db      "tablero.txt",0
+    modoAperturaRead            db      "r",0   ; Abro y leo un archivo de texto
+    modoAperturaWrite           db      "w",0
+    archivoEstadisticas         db      "estadisticas.txt",0
 
-    msgErrorAp          db      "Lo sentimos, no se pudo abrir el archivo.",10,0
-    msgErrorLectura     db      "No se encontró una partida guardada, se iniciará una nueva.",10,0
-    msgLeido            db      "Leído con éxito.",10,0
-    msgErrorConvirt     db      "Error convirtiendo el numero",10,0
-    msgErrorEscritura   db      "Error escribiendo el archivo",10,0
-    msgPartidaGuardada  db      "Se ha encontrado una partida guardada, desea continuarla? (si/no)",10,0
-    msgGuardarPartida   db      "Estás saliendo del juego, querés guardar tu partida? (si/no)",10,0
-    respuestaSi         db      "si",0
-    registro            times 51  db  " "
-    tableroStr          times 51  db  " "
+    msgErrorAp                  db      "Lo sentimos, no se pudo abrir el archivo.",10,0
+    msgErrorLectura             db      "No se encontró una partida guardada, se iniciará una nueva.",10,0
+    msgLeido                    db      "Leído con éxito.",10,0
+    msgErrorConvirt             db      "Error convirtiendo el numero",10,0
+    msgErrorEscritura           db      "Error escribiendo el archivo",10,0
+    msgPartidaGuardada          db      "Se ha encontrado una partida guardada, desea continuarla? (si/no)",10,0
+    msgGuardarPartida           db      "Estás saliendo del juego, querés guardar tu partida? (si/no)",10,0
+    respuestaSi                 db      "si",0
+    registro          times 51  db      " "
+    tableroStr        times 51  db      " "
+    
+    estadisticas      times 0   db      ''
+        turnoGuardado           db      " "
+        cantOcasComidas         db      " "
 
-    CANT_FIL_COL        equ   7
-    DESPLAZ_LIMITE      equ   48
+
+    CANT_FIL_COL        equ     7
+    DESPLAZ_LIMITE      equ     48
+    TURNO_ZORRO         equ     1
+    TURNO_OCAS          equ     2
+
 
 section .bss
     buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
@@ -90,12 +99,12 @@ section .bss
 
 section .text
 main:
-    
+    mov     rdi, archivoTablero
     call    abrirLecturaArchivo
     cmp     rax, 0
     jle     errorApertura
         
-    call    leerArchivo  
+    call    leerArchivoTablero  
     cmp     rax, 0
     jle     errorLeyendoArchivo
 
@@ -110,6 +119,8 @@ main:
     jne     continuar_jugando
     call    copiarRegistroATablero
     call    cerrarArchivo
+
+    call    cargarEstadisticas
 
 continuar_jugando:
     sub     rsp,8
@@ -142,7 +153,7 @@ turno_zorro:
     add     rsp,8
     cmp     byte [inputValido], 'R'  ;comparo si el movimiento del zorro fue inválido
     je      turno_zorro              ;si fue inválido, vuelvo a pedir movimiento del zorro
-    mov     byte [turno], 2          ;si fue válido, cambio el turno a las ocas
+    mov     byte [turno], TURNO_OCAS          ;si fue válido, cambio el turno a las ocas
     jmp     continuar_juego          ;voy a la etiqueta continuar_juego
 
 turno_ocas:
@@ -156,7 +167,7 @@ turno_ocas:
     add     rsp,8
     cmp     byte [inputValido], 'R'  ;comparo si el movimiento de la oca fue inválido
     je      turno_ocas               ;si fue inválido, vuelvo a pedir movimiento de la oca
-    mov     byte [turno], 1          ;si fue válido, cambio el turno al zorro
+    mov     byte [turno], TURNO_ZORRO          ;si fue válido, cambio el turno al zorro
 
 continuar_juego:
     sub     rsp,8
@@ -179,7 +190,7 @@ ingresar_nombres_jugadores:
     mov rdi, nombre_jugador2
     mGets
 
-    mov byte [turno], 1  ; Comienza el turno del zorro
+    mov byte [turno], TURNO_ZORRO  ; Comienza el turno del zorro
     ret
 
 construir_tablero:
@@ -492,6 +503,7 @@ errorEscritura:
     jmp   fin_juego
 
 guardar_partida:
+    mov     rdi, archivoTablero
     call    abrirEscrituraArchivo
 
     mov     rdi, msgGuardarPartida
@@ -519,7 +531,7 @@ ret
 
 ;---------  RUTINAS INTERNAS -----------
 abrirLecturaArchivo:
-  mov   rdi, archivo
+  
   mov   rsi, modoAperturaRead
   call  fopen
 
@@ -527,14 +539,14 @@ abrirLecturaArchivo:
 ret
 
 abrirEscrituraArchivo:
-  mov   rdi, archivo
+  
   mov   rsi, modoAperturaWrite
   call  fopen
 
   mov   qword[handleArch],rax
 ret
 
-leerArchivo:
+leerArchivoTablero:
 
   mov   rdi, registro
   mov   rsi, 51
@@ -667,3 +679,6 @@ avanzarFilaStr:
 finalizoCopiaStr:
   mov   byte[tableroStr+49], 10 ;Agrego un salto de línea al final del archivo
 ret
+
+
+cargarEstadisticas:
