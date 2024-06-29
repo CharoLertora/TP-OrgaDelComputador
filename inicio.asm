@@ -55,10 +55,17 @@ section .data
     mensaje_ingresar_simbolo_oca db "Ingrese el simbolo para las ocas (presione Enter para usar 'O'): ", 0
     mensaje_ganador             db "El ganador es: %s ", 0
     mensaje_fin_juego           db "El juego ha sido abandonado.", 0
-    mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli", 0
+    mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli",0
     cantidad_ocas_eliminadas    dq 0
+    msg_mov_abajo               db "Movimientos abajo: %hhi",0
+    msg_mov_arriba              db "Movimientos arriba: %hhi",0
+    msg_mov_izquierda           db "Movimientos izquierda: %hhi",0
+    msg_mov_derecha             db "Movimientos derecha: %hhi",0
+    msg_mov_abajo_der           db "Movimientos abajo y derecha: %hhi",0
+    msg_mov_abajo_izq           db "Movimientos abajo e izquierda: %hhi",0
+    msg_mov_arriba_der          db "Movimientos arriba y derecha: %hhi",0
+    msg_mov_arriba_izq          db "Movimientos arriba e izquierda: %hhi",0
 
-    
     ;Variables de archivo
     archivoTablero              db      "tablero.txt",0
     modoAperturaRead            db      "r",0   ; Abro y leo un archivo de texto
@@ -77,8 +84,16 @@ section .data
     tableroStr        times 51  db      " "
     
     estadisticas      times 0   db      ''
-        turnoGuardado           db      " "
-        cantOcasEliminadas      db      " "
+        turnoGuardado                        db     " "
+        cantOcasEliminadas                   db     " "
+        estats_mov_abajo_guardado            db     " "
+        estats_mov_arriba_guardado           db     " "
+        estats_mov_izq_guardado              db     " "
+        estats_mov_der_guardado              db     " "
+        estats_mov_abajo_der_guardado        db     " "
+        estats_mov_abajo_izq_guardado        db     " "
+        estats_mov_arriba_der_guardado       db     " "
+        estats_mov_arriba_izq_guardado       db     " "
         
 
     CANT_FIL_COL        equ     7
@@ -99,6 +114,14 @@ section .bss
     nombre_jugador2 resb 50
     turno           resb 1
     comio_oca       resb 1
+    estats_mov_abajo            resb 1
+    estats_mov_arriba           resb 1
+    estats_mov_izq              resb 1
+    estats_mov_der              resb 1
+    estats_mov_abajo_der        resb 1
+    estats_mov_abajo_izq        resb 1
+    estats_mov_arriba_der       resb 1
+    estats_mov_arriba_izq       resb 1
 
     ;Variables de archivo
     handleArchTablero           resq  1
@@ -112,6 +135,15 @@ section .bss
 section .text
 main:
     mov     byte[turno], TURNO_ZORRO
+    mov     byte[estats_mov_abajo], 0
+    mov     byte[estats_mov_arriba], 0
+    mov     byte[estats_mov_izq], 0
+    mov     byte[estats_mov_der], 0
+    mov     byte[estats_mov_abajo_der], 0
+    mov     byte[estats_mov_abajo_izq], 0
+    mov     byte[estats_mov_arriba_der], 0
+    mov     byte[estats_mov_arriba_izq], 0
+    
     mov     rdi, archivoTablero
     call    abrirLecturaArchivoTablero
     cmp     rax, 0
@@ -236,9 +268,6 @@ skip_default_zorro:
     jne     construir_tablero          ; si no es enter, se utiliza el del usuario que se guardo en simbolo_oca
     mov     byte [simbolo_oca], 'O'   ; se asigna el símbolo por defecto para las ocas, pisando en caso de enter
 
-;skip_default_oca:
-;    mov byte [turno], TURNO_ZORRO  ; Comienza el turno del zorro
-;    ret
 
 construir_tablero:
     mov     rbx, 1            ; i que será la fila, iniciada en 1 y no aumenta hasta no terminar las 7 columnas
@@ -420,6 +449,7 @@ validar_movimiento_zorro:
     mov byte [rbx], 3           ; Colocar al zorro en la nueva posición
     mov byte [comio_oca], 0     ; Indicar que no comió oca
     mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
+    call    sumarEstadisticaMovimiento
     ret
 
 verificar_si_oca:
@@ -758,7 +788,7 @@ noGuardarPartida:
     call    abrirEscrituraArchivoEstadisticas
     call    cerrarArchivoEstadisticas
 fin_juego:
-
+    call    mostrar_estadisticas
     mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
     mPuts
     mov     eax, 60                 ; syscall: exit
@@ -813,7 +843,7 @@ ret
 
 leerArchivoEstadisticas:
     mov     rdi, estadisticas
-    mov     rsi, 3
+    mov     rsi, 11
     mov     rdx, [handleArchEstadisticas]
     call    fgets
 
@@ -963,6 +993,38 @@ cargarEstadisticas:
     mov     rcx, [cantOcasEliminadas]
     sub     rcx, 48
     mov     [cantidad_ocas_eliminadas], rcx
+
+    mov     rcx, [estats_mov_abajo_guardado]
+    sub     rcx, 48
+    mov     [estats_mov_abajo], rcx
+
+    mov     rcx, [estats_mov_abajo_izq_guardado]
+    sub     rcx, 48
+    mov     [estats_mov_abajo_izq], rcx
+
+    mov     rcx, [estats_mov_abajo_der_guardado]
+    sub     rcx, 48
+    mov     [estats_mov_abajo_der], rcx
+
+    mov     rcx, [estats_mov_arriba_guardado]
+    sub     rcx, 48
+    mov     [estats_mov_arriba], rcx
+
+    mov     rcx, [estats_mov_arriba_izq_guardado]
+    sub     rcx, 48
+    mov     [estats_mov_arriba_izq], rcx
+
+    mov     rcx, [estats_mov_arriba_der_guardado]
+    sub     rcx, 48
+    mov     [estats_mov_arriba_der], rcx
+
+    mov     rcx, [estats_mov_der_guardado]
+    sub     rcx, 48
+    mov     [estats_mov_der], rcx
+
+    mov     rcx, [estats_mov_izq_guardado]
+    sub     rcx, 48
+    mov     [estats_mov_izq], rcx
 ret
 
 convertirEstadisticasAStr:
@@ -974,6 +1036,133 @@ convertirEstadisticasAStr:
     add     rcx, 48
     mov     [cantOcasEliminadas], rcx
 
-    mov     byte[estadisticas+2], 10
+    mov     rcx, [estats_mov_abajo_guardado]
+    add     rcx, 48
+    mov     [estats_mov_abajo], rcx
 
+    mov     rcx, [estats_mov_abajo_izq_guardado]
+    add     rcx, 48
+    mov     [estats_mov_abajo_izq], rcx
+
+    mov     rcx, [estats_mov_abajo_der_guardado]
+    add     rcx, 48
+    mov     [estats_mov_abajo_der], rcx
+
+    mov     rcx, [estats_mov_arriba_guardado]
+    add     rcx, 48
+    mov     [estats_mov_arriba], rcx
+
+    mov     rcx, [estats_mov_arriba_izq_guardado]
+    add     rcx, 48
+    mov     [estats_mov_arriba_izq], rcx
+
+    mov     rcx, [estats_mov_arriba_der_guardado]
+    add     rcx, 48
+    mov     [estats_mov_arriba_der], rcx
+
+    mov     rcx, [estats_mov_der_guardado]
+    add     rcx, 48
+    mov     [estats_mov_der], rcx
+
+    mov     rcx, [estats_mov_izq_guardado]
+    add     rcx, 48
+    mov     [estats_mov_izq], rcx
+
+    mov     byte[estadisticas+10], 10
+
+ret
+
+sumarEstadisticaMovimiento:
+    mov rdi, input_zorro
+    mov al, [rdi]
+    
+    cmp al, 'w'
+    jne movimiento_abajo
+    inc byte[estats_mov_arriba]
+    jmp fin_estadisticas_mov
+
+movimiento_abajo:
+    cmp al, 's'
+    jne movimiento_izq
+    inc byte[estats_mov_abajo]
+    jmp fin_estadisticas_mov
+
+movimiento_izq:
+    cmp al, 'a'
+    jne movimiento_derecha
+    inc byte[estats_mov_izq]
+    jmp fin_estadisticas_mov
+
+movimiento_derecha:
+    cmp al, 'd'
+    jne movimiento_arriba_der
+    inc byte[estats_mov_der]
+    jmp fin_estadisticas_mov
+
+movimiento_arriba_der:
+    cmp al, 'e'
+    jne movimiento_arriba_izq
+    inc byte[estats_mov_arriba_der]
+    jmp fin_estadisticas_mov
+
+movimiento_arriba_izq:
+    cmp al, 'q'
+    jne movimiento_abajo_izq
+    inc byte[estats_mov_arriba_izq]
+    jmp fin_estadisticas_mov
+
+movimiento_abajo_izq:
+    cmp al, 'z'
+    jne movimiento_abajo_der
+    inc byte[estats_mov_abajo_izq]
+    jmp fin_estadisticas_mov
+
+movimiento_abajo_der:
+    cmp al, 'x'
+    inc byte[estats_mov_abajo_der]
+
+fin_estadisticas_mov:
+ret
+
+mostrar_estadisticas:
+
+    mov rdi, msg_mov_abajo
+    sub rsi, rsi
+    mov rsi, [estats_mov_abajo]
+    mPrintF
+
+    mov rdi, msg_mov_abajo_der
+    sub rsi, rsi
+    mov rsi, [estats_mov_abajo_der]
+    mPrintF
+
+    mov rdi, msg_mov_abajo_izq
+    sub rsi, rsi
+    mov rsi, [estats_mov_abajo_izq]
+    mPrintF
+
+    mov rdi, msg_mov_arriba
+    sub rsi, rsi
+    mov rsi, [estats_mov_arriba]
+    mPrintF
+
+    mov rdi, msg_mov_arriba_izq
+    sub rsi, rsi
+    mov rsi, [estats_mov_arriba_izq]
+    mPrintF
+
+    mov rdi, msg_mov_arriba_der
+    sub rsi, rsi
+    mov rsi, [estats_mov_arriba_der]
+    mPrintF
+
+    mov rdi, msg_mov_derecha
+    sub rsi, rsi
+    mov rsi, [estats_mov_der]
+    mPrintF
+
+    mov rdi, msg_mov_izquierda
+    sub rsi, rsi
+    mov rsi, [estats_mov_izq]
+    mPrintF
 ret
