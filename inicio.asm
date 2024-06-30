@@ -37,6 +37,14 @@ section .data
                 db  0, 0, 2, 2, 2, 0, 0
                 db  0, 0, 2, 2, 2, 0, 0
 
+    tablero_invertido db  0, 0, 2, 2, 2, 0, 0
+                      db  0, 0, 2, 2, 2, 0, 0
+                      db  1, 2, 2, 3, 2, 2, 1
+                      db  1, 2, 2, 2, 2, 2, 1
+                      db  1, 1, 1, 1, 1, 1, 1
+                      db  0, 0, 1, 1, 1, 0, 0
+                      db  0, 0, 1, 1, 1, 0, 0
+
     salto_linea                 db 10, 0        
     simbolo_fuera_tablero       db ".", 0
     simbolo_oca                 db 'O', 0    ; symbolo por default para ocas
@@ -53,18 +61,12 @@ section .data
     mensaje_ingresar_j2         db "Ingrese el nombre del jugador 2 (ocas): ", 0
     mensaje_ingresar_simbolo_zorro db "Ingrese el simbolo para el zorro (presione Enter para usar 'X'): ", 0
     mensaje_ingresar_simbolo_oca db "Ingrese el simbolo para las ocas (presione Enter para usar 'O'): ", 0
+    mensaje_rotacion            db "Desea cambiar la rotacion del tablero? (0 para no/1 para si)", 0
+    seleccion_tablero           dq 0  ; 0 para el tablero original, 1 para el tablero rotado
     mensaje_ganador             db "El ganador es: %s ", 0
     mensaje_fin_juego           db "El juego ha sido abandonado.", 0
     mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli",0
     cantidad_ocas_eliminadas    dq 0
-    coordenadas_columnas        db " 1  2  3  4  5  6  7", 0
-    numero_fila_1 db '1', 0
-    numero_fila_2 db '2', 0
-    numero_fila_3 db '3', 0
-    numero_fila_4 db '4', 0
-    numero_fila_5 db '5', 0
-    numero_fila_6 db '6', 0
-    numero_fila_7 db '7', 0
 
     msg_mov_abajo               db "Movimientos abajo: %li",0
     msg_mov_arriba              db "Movimientos arriba: %li",0
@@ -173,6 +175,43 @@ main:
 continuar_jugando:
     sub     rsp,8
     call    ingresar_nombres_y_simbolos_jugadores  ;llamo a la subrutina para ingresar nombres y simbolos
+    add     rsp,8
+
+    mov    rdi, mensaje_rotacion
+    call   mPuts
+
+    mov     rdi, buffer
+    mGets
+
+    ; Compara la respuesta con "si" y actualiza seleccion_tablero si es necesario
+    lea     rsi, [respuestaSi]
+    lea     rdi, [buffer]
+    mov     rcx, 2
+    repe    cmpsb
+    jne     no_rotation
+
+    ; Si la respuesta es "si", actualizar seleccion_tablero
+    mov     qword [seleccion_tablero], 1
+    call    cambiar_tablero_invertido
+    jmp     comprobar_rotacion
+
+no_rotation:
+    ; Si la respuesta es "no", mantener seleccion_tablero en 0
+    mov     qword [seleccion_tablero], 0
+
+cambiar_tablero_invertido:
+    mov     rdi, tablero_invertido
+    mov     rsi, tablero
+    mov     rcx, CANT_FIL_COL * CANT_FIL_COL  ; Número de elementos en el tablero
+    rep movsb
+
+comprobar_rotacion:
+    sub     rsp,8
+    call    construir_tablero       ;llamo a la subrutina para construir el tablero inicial
+    add     rsp,8
+
+    sub     rsp,8
+    call    imprimir_tablero        ;llamo a la subrutina para imprimir el tablero
     add     rsp,8
 
     sub     rsp,8
@@ -338,58 +377,8 @@ imprimir_espacio_vacio:
 continuar_construyendo_tablero:
     inc     r10                ; Incrementar en uno para tener la siguiente columna
     cmp     r10, 8             ; Si no llegué a la columna 7, construyo el siguiente elemento de la misma fila              
-    jl      imprimir_siguiente_caracter  
-    ; Añadir el número de la fila antes del salto de línea
-    cmp     rbx, 1
-    je      imprimir_fila_1
-    cmp     rbx, 2
-    je      imprimir_fila_2
-    cmp     rbx, 3
-    je      imprimir_fila_3
-    cmp     rbx, 4
-    je      imprimir_fila_4
-    cmp     rbx, 5
-    je      imprimir_fila_5
-    cmp     rbx, 6
-    je      imprimir_fila_6
-    cmp     rbx, 7
-    je      imprimir_fila_7   
-    
-imprimir_fila_1:
-    mov     al, [numero_fila_1]
-    stosb
-    jmp     imprimir_salto_linea
+    jl      imprimir_siguiente_caracter       
 
-imprimir_fila_2:
-    mov     al, [numero_fila_2]
-    stosb
-    jmp     imprimir_salto_linea
-
-imprimir_fila_3:
-    mov     al, [numero_fila_3]
-    stosb
-    jmp     imprimir_salto_linea
-
-imprimir_fila_4:
-    mov     al, [numero_fila_4]
-    stosb
-    jmp     imprimir_salto_linea
-
-imprimir_fila_5:
-    mov     al, [numero_fila_5]
-    stosb
-    jmp     imprimir_salto_linea
-
-imprimir_fila_6:
-    mov     al, [numero_fila_6]
-    stosb
-    jmp     imprimir_salto_linea
-
-imprimir_fila_7:
-    mov     al, [numero_fila_7]
-    stosb
-      
-imprimir_salto_linea:
     ; Añadir un salto de línea al final de la fila
     mov     al, [salto_linea]
     stosb
@@ -404,8 +393,6 @@ fin_construir_tablero:
     ret
 
 imprimir_tablero:
-    mov     rdi, coordenadas_columnas
-    mPuts
     mov     rdi, buffer
     mPuts
     mov rdi, mensaje_ocas_eliminadas
