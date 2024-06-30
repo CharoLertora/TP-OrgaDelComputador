@@ -1005,7 +1005,7 @@ sumarEstadisticaMovimiento:
     mov rax, [rdi]
 
 movimiento_arriba:
-    cmp rax, 'w'
+    cmp al, 'w'
     jne movimiento_abajo
     add qword[estats_mov_arriba], 1
     jmp fin_estadisticas_mov
