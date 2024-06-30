@@ -84,6 +84,15 @@ section .data
     registro          times 51  db      " "
     tableroStr        times 51  db      " "
     
+    estats_mov_abajo            dq  0
+    estats_mov_arriba           dq  0
+    estats_mov_izq              dq  0
+    estats_mov_der              dq  0
+    estats_mov_abajo_der        dq  0
+    estats_mov_abajo_izq        dq  0
+    estats_mov_arriba_der       dq  0
+    estats_mov_arriba_izq       dq  0
+    
     estadisticas      times 0   db      ''
         turnoGuardado                        db     " "
         cantOcasEliminadas                   db     " "
@@ -95,6 +104,7 @@ section .data
         estats_mov_abajo_izq_guardado        db     " "
         estats_mov_arriba_der_guardado       db     " "
         estats_mov_arriba_izq_guardado       db     " "
+        salto_linea_archivo                  db     " "
         
 
     CANT_FIL_COL        equ     7
@@ -102,14 +112,6 @@ section .data
     TURNO_ZORRO         equ     1
     TURNO_OCAS          equ     2
 
-    estats_mov_abajo            dq  0
-    estats_mov_arriba           dq  0
-    estats_mov_izq              dq  0
-    estats_mov_der              dq  0
-    estats_mov_abajo_der        dq  0
-    estats_mov_abajo_izq        dq  0
-    estats_mov_arriba_der       dq  0
-    estats_mov_arriba_izq       dq  0
 
 section .bss
     buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
@@ -756,7 +758,9 @@ guardar_partida:
     mov     rdi, archivoEstadisticas
     call    abrirEscrituraArchivoEstadisticas
     call    convertirEstadisticasAStr
+    
     call    escribirArchivoEstadisticas
+    
     cmp     rax, 0
     jle     errorEscritura
     call    cerrarArchivoEstadisticas
@@ -839,7 +843,7 @@ ret
 
 leerArchivoEstadisticas:
     mov     rdi, estadisticas
-    mov     rsi, 11
+    mov     rsi, 12
     mov     rdx, [handleArchEstadisticas]
     call    fgets
 
@@ -1064,7 +1068,8 @@ convertirEstadisticasAStr:
     add     rcx, 48
     mov     [estats_mov_izq_guardado], rcx
 
-    mov     byte[estadisticas+10], 10
+    mov     rcx, 10
+    mov     [salto_linea_archivo], rcx
 
 ret
 sumarEstadisticaMovimiento:

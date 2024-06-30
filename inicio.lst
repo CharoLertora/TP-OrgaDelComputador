@@ -217,1343 +217,1345 @@
     84 0000058C 20<rep 33h>                 registro          times 51  db      " "
     85 000005BF 20<rep 33h>                 tableroStr        times 51  db      " "
     86                                      
-    87                                      estadisticas      times 0   db      ''
-    88 000005F2 20                              turnoGuardado                        db     " "
-    89 000005F3 20                              cantOcasEliminadas                   db     " "
-    90 000005F4 20                              estats_mov_abajo_guardado            db     " "
-    91 000005F5 20                              estats_mov_arriba_guardado           db     " "
-    92 000005F6 20                              estats_mov_izq_guardado              db     " "
-    93 000005F7 20                              estats_mov_der_guardado              db     " "
-    94 000005F8 20                              estats_mov_abajo_der_guardado        db     " "
-    95 000005F9 20                              estats_mov_abajo_izq_guardado        db     " "
-    96 000005FA 20                              estats_mov_arriba_der_guardado       db     " "
-    97 000005FB 20                              estats_mov_arriba_izq_guardado       db     " "
-    98                                          
-    99                                  
-   100                                      CANT_FIL_COL        equ     7
-   101                                      DESPLAZ_LIMITE      equ     48
-   102                                      TURNO_ZORRO         equ     1
-   103                                      TURNO_OCAS          equ     2
-   104                                  
-   105 000005FC 0000000000000000            estats_mov_abajo            dq  0
-   106 00000604 0000000000000000            estats_mov_arriba           dq  0
-   107 0000060C 0000000000000000            estats_mov_izq              dq  0
-   108 00000614 0000000000000000            estats_mov_der              dq  0
-   109 0000061C 0000000000000000            estats_mov_abajo_der        dq  0
-   110 00000624 0000000000000000            estats_mov_abajo_izq        dq  0
-   111 0000062C 0000000000000000            estats_mov_arriba_der       dq  0
-   112 00000634 0000000000000000            estats_mov_arriba_izq       dq  0
-   113                                  
-   114                                  section .bss
-   115 00000000 <res 15Eh>                  buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
-   116 0000015E <res Ah>                    input_oca       resb 10
-   117 00000168 ??                          fila            resb 1
-   118 00000169 ??                          columna         resb 1
-   119 0000016A ??                          input_valido    resb 1
-   120 0000016B ????????????????            posicion_oca    resq 1
-   121 00000173 <res Ah>                    input_zorro     resb 10
-   122 0000017D <res 32h>                   nombre_jugador1 resb 50
-   123 000001AF <res 32h>                   nombre_jugador2 resb 50
-   124 000001E1 ??                          turno           resb 1
-   125 000001E2 ??                          comio_oca       resb 1
-   126                                  
-   127                                      ;Variables de archivo
-   128 000001E3 ????????????????            handleArchTablero           resq  1
-   129 000001EB ????????????????            handleArchEstadisticas      resq  1
-   130 000001F3 ??                          numero                      resb  1
-   131 000001F4 ??                          posicionVect                resb  1
-   132 000001F5 ??                          posicionMatFil              resb  1
-   133 000001F6 ??                          posicionMatCol              resb  1
-   134 000001F7 ????????                    respuestaPartidaGuardada    resb  4
-   135                                  
-   136                                  section .text
-   137                                  main:
-   138 00000000 C60425[E1010000]01          mov     byte[turno], TURNO_ZORRO
-   139                                  
-   140 00000008 48BF-                       mov     rdi, archivoTablero
-   140 0000000A [2D04000000000000] 
-   141 00000012 E84C0A0000                  call    abrirLecturaArchivoTablero
-   142 00000017 4883F800                    cmp     rax, 0
-   143 0000001B 0F8EC4080000                jle     errorApertura
-   144                                          
-   145 00000021 E89D0A0000                  call    leerArchivoTablero  
-   146 00000026 4883F800                    cmp     rax, 0
-   147 0000002A 0F8ED1080000                jle     errorLeyendoArchivo
-   148                                  
-   149 00000030 48BF-                       mov     rdi, msgPartidaGuardada
-   149 00000032 [0805000000000000] 
-   150                                      mPuts
+    87 000005F2 0000000000000000            estats_mov_abajo            dq  0
+    88 000005FA 0000000000000000            estats_mov_arriba           dq  0
+    89 00000602 0000000000000000            estats_mov_izq              dq  0
+    90 0000060A 0000000000000000            estats_mov_der              dq  0
+    91 00000612 0000000000000000            estats_mov_abajo_der        dq  0
+    92 0000061A 0000000000000000            estats_mov_abajo_izq        dq  0
+    93 00000622 0000000000000000            estats_mov_arriba_der       dq  0
+    94 0000062A 0000000000000000            estats_mov_arriba_izq       dq  0
+    95                                      
+    96                                      estadisticas      times 0   db      ''
+    97 00000632 20                              turnoGuardado                        db     " "
+    98 00000633 20                              cantOcasEliminadas                   db     " "
+    99 00000634 20                              estats_mov_abajo_guardado            db     " "
+   100 00000635 20                              estats_mov_arriba_guardado           db     " "
+   101 00000636 20                              estats_mov_izq_guardado              db     " "
+   102 00000637 20                              estats_mov_der_guardado              db     " "
+   103 00000638 20                              estats_mov_abajo_der_guardado        db     " "
+   104 00000639 20                              estats_mov_abajo_izq_guardado        db     " "
+   105 0000063A 20                              estats_mov_arriba_der_guardado       db     " "
+   106 0000063B 20                              estats_mov_arriba_izq_guardado       db     " "
+   107 0000063C 0A                              salto_linea_archivo                  db     10
+   108                                          
+   109                                  
+   110                                      CANT_FIL_COL        equ     7
+   111                                      DESPLAZ_LIMITE      equ     48
+   112                                      TURNO_ZORRO         equ     1
+   113                                      TURNO_OCAS          equ     2
+   114                                  
+   115                                  
+   116                                  section .bss
+   117 00000000 <res 15Eh>                  buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
+   118 0000015E <res Ah>                    input_oca       resb 10
+   119 00000168 ??                          fila            resb 1
+   120 00000169 ??                          columna         resb 1
+   121 0000016A ??                          input_valido    resb 1
+   122 0000016B ????????????????            posicion_oca    resq 1
+   123 00000173 <res Ah>                    input_zorro     resb 10
+   124 0000017D <res 32h>                   nombre_jugador1 resb 50
+   125 000001AF <res 32h>                   nombre_jugador2 resb 50
+   126 000001E1 ??                          turno           resb 1
+   127 000001E2 ??                          comio_oca       resb 1
+   128                                  
+   129                                      ;Variables de archivo
+   130 000001E3 ????????????????            handleArchTablero           resq  1
+   131 000001EB ????????????????            handleArchEstadisticas      resq  1
+   132 000001F3 ??                          numero                      resb  1
+   133 000001F4 ??                          posicionVect                resb  1
+   134 000001F5 ??                          posicionMatFil              resb  1
+   135 000001F6 ??                          posicionMatCol              resb  1
+   136 000001F7 ????????                    respuestaPartidaGuardada    resb  4
+   137                                  
+   138                                  section .text
+   139                                  main:
+   140 00000000 C60425[E1010000]01          mov     byte[turno], TURNO_ZORRO
+   141                                  
+   142 00000008 48BF-                       mov     rdi, archivoTablero
+   142 0000000A [2D04000000000000] 
+   143 00000012 E84C0A0000                  call    abrirLecturaArchivoTablero
+   144 00000017 4883F800                    cmp     rax, 0
+   145 0000001B 0F8EC4080000                jle     errorApertura
+   146                                          
+   147 00000021 E89D0A0000                  call    leerArchivoTablero  
+   148 00000026 4883F800                    cmp     rax, 0
+   149 0000002A 0F8ED1080000                jle     errorLeyendoArchivo
+   150                                  
+   151 00000030 48BF-                       mov     rdi, msgPartidaGuardada
+   151 00000032 [0805000000000000] 
+   152                                      mPuts
      4 0000003A 4883EC08            <1>  sub rsp,8
      5 0000003E E8(00000000)        <1>  call puts
      6 00000043 4883C408            <1>  add rsp,8
-   151 00000047 48BF-                       mov     rdi, respuestaPartidaGuardada
-   151 00000049 [F701000000000000] 
-   152                                      mGets
+   153 00000047 48BF-                       mov     rdi, respuestaPartidaGuardada
+   153 00000049 [F701000000000000] 
+   154                                      mGets
     10 00000051 4883EC08            <1>  sub rsp,8
     11 00000055 E8(00000000)        <1>  call gets
     12 0000005A 4883C408            <1>  add rsp,8
-   153 0000005E B902000000                  mov     rcx, 2
-   154 00000063 488D3425[89050000]          lea     rsi, [respuestaSi]
-   155 0000006B 488D3C25[F7010000]          lea     rdi, [respuestaPartidaGuardada]
-   156 00000073 F3A6                        repe    cmpsb
-   157 00000075 753C                        jne     continuar_jugando
-   158 00000077 E8CC0A0000                  call    copiarRegistroATablero
-   159 0000007C E8AB0A0000                  call    cerrarArchivoTablero
-   160                                  
-   161 00000081 48BF-                       mov     rdi, archivoEstadisticas
-   161 00000083 [3D04000000000000] 
-   162 0000008B E8EB090000                  call    abrirLecturaArchivoEstadisticas
-   163 00000090 4883F800                    cmp     rax, 0
-   164 00000094 0F8E4B080000                jle     errorApertura
-   165                                  
-   166 0000009A E8410A0000                  call    leerArchivoEstadisticas
-   167 0000009F 4883F800                    cmp     rax, 0
-   168 000000A3 0F8E58080000                jle     errorLeyendoArchivo
-   169 000000A9 E8D40B0000                  call    cargarEstadisticas
-   170 000000AE E8870A0000                  call    cerrarArchivoEstadisticas
-   171                                  
-   172                                  continuar_jugando:
-   173 000000B3 4883EC08                    sub     rsp,8
-   174 000000B7 E8F5000000                  call    ingresar_nombres_y_simbolos_jugadores  ;llamo a la subrutina para ingresar nombres y simbolos
-   175 000000BC 4883C408                    add     rsp,8
-   176                                  
-   177 000000C0 4883EC08                    sub     rsp,8
-   178 000000C4 E8D8010000                  call    construir_tablero       ;llamo a la subrutina para construir el tablero inicial
-   179 000000C9 4883C408                    add     rsp,8
-   180                                  
-   181 000000CD 4883EC08                    sub     rsp,8
-   182 000000D1 E8A6020000                  call    imprimir_tablero        ;llamo a la subrutina para imprimir el tablero
-   183 000000D6 4883C408                    add     rsp,8
-   184                                  
-   185                                  loop_juego:
-   186 000000DA 8A0425[E1010000]            mov     al, [turno]     ; veo de quien es el turno
-   187 000000E1 3C01                        cmp     al, 1
-   188 000000E3 7404                        je turno_zorro          ; si es el turno del zorro, voy a la etiqueta turno_zorro
-   189 000000E5 3C02                        cmp     al, 2
-   190 000000E7 746E                        je turno_ocas           ; si es el turno de las ocas, voy a la etiqueta turno_ocas
-   191                                  
-   192                                  turno_zorro:
-   193 000000E9 4883EC08                    sub     rsp,8
-   194 000000ED E86E040000                  call    verificar_movimientos_zorro  ; Verifico si el zorro tiene movimientos disponibles
-   195 000000F2 4883C408                    add     rsp,8
-   196 000000F6 803C25[6A010000]4E          cmp     byte [input_valido], 'N'  ; Si no tiene movimientos válidos, las ocas ganan
-   197 000000FE 0F84F5080000                je      ganador_ocas
-   198 00000104 4883EC08                    sub     rsp,8
-   199 00000108 E8BD020000                  call    pedir_movimiento_zorro  ;llamo a la subrutina para pedir movimiento del zorro
-   200 0000010D 4883C408                    add     rsp,8
-   201 00000111 803C25[73010000]66          cmp     byte [input_zorro], 'f' ; Verificar si se desea abandonar la partida
-   202 00000119 0F841A080000                je      guardar_partida
-   203 0000011F 4883EC08                    sub     rsp,8
-   204 00000123 E8D1020000                  call    mover_zorro              ;llamo a la subrutina para mover al zorro
-   205 00000128 4883C408                    add     rsp,8
-   206 0000012C 803C25[6A010000]52          cmp     byte [input_valido], 'R'  ;comparo si el movimiento del zorro fue inválido
-   207 00000134 74B3                        je      turno_zorro              ;si fue inválido, vuelvo a pedir movimiento del zorro
-   208 00000136 4883EC08                    sub     rsp, 8
-   209 0000013A E8DD0C0000                  call    sumarEstadisticaMovimiento
-   210 0000013F 4883C408                    add     rsp, 8
-   211 00000143 803C25[E2010000]01          cmp     byte [comio_oca], TURNO_ZORRO      ; Si comió una oca, no cambiar de turno
-   212 0000014B 7444                        je      continuar_juego
-   213 0000014D C60425[E1010000]02          mov     byte [turno], TURNO_OCAS          ;si fue válido y no comió oca, cambio el turno a las ocas
-   214 00000155 EB3A                        jmp     continuar_juego          ;voy a la etiqueta continuar_juego
-   215                                  
-   216                                  turno_ocas:
-   217 00000157 4883EC08                    sub     rsp,8
-   218 0000015B E887050000                  call    pedir_movimiento_oca     ;llamo a la subrutina para pedir movimiento de la oca
-   219 00000160 4883C408                    add     rsp,8
-   220 00000164 803C25[5E010000]66          cmp     byte [input_oca], 'f'    ; Verificar si se desea abandonar la partida
-   221 0000016C 0F84C7070000                je      guardar_partida
-   222 00000172 4883EC08                    sub     rsp,8
-   223 00000176 E813060000                  call    mover_oca                ;llamo a la subrutina para mover la oca
-   224 0000017B 4883C408                    add     rsp,8
-   225 0000017F 803C25[6A010000]52          cmp     byte [input_valido], 'R'  ;comparo si el movimiento de la oca fue inválido
-   226 00000187 74CE                        je      turno_ocas               ;si fue inválido, vuelvo a pedir movimiento de la oca
-   227 00000189 C60425[E1010000]01          mov     byte [turno], TURNO_ZORRO          ;si fue válido, cambio el turno al zorro
-   228                                  
-   229                                  continuar_juego:
-   230 00000191 4883EC08                    sub     rsp,8
-   231 00000195 E807010000                  call    construir_tablero       ;reconstruyo el tablero después de cada turno
-   232 0000019A 4883C408                    add     rsp,8
-   233 0000019E 4883EC08                    sub     rsp,8
-   234 000001A2 E8D5010000                  call    imprimir_tablero        ;imprimo el tablero después de cada turno
-   235 000001A7 4883C408                    add     rsp,8
-   236 000001AB E92AFFFFFF                  jmp     loop_juego              ;vuelvo al inicio del bucle del juego
-   237                                  
-   238 000001B0 C3                          ret
+   155 0000005E B902000000                  mov     rcx, 2
+   156 00000063 488D3425[89050000]          lea     rsi, [respuestaSi]
+   157 0000006B 488D3C25[F7010000]          lea     rdi, [respuestaPartidaGuardada]
+   158 00000073 F3A6                        repe    cmpsb
+   159 00000075 753C                        jne     continuar_jugando
+   160 00000077 E8CC0A0000                  call    copiarRegistroATablero
+   161 0000007C E8AB0A0000                  call    cerrarArchivoTablero
+   162                                  
+   163 00000081 48BF-                       mov     rdi, archivoEstadisticas
+   163 00000083 [3D04000000000000] 
+   164 0000008B E8EB090000                  call    abrirLecturaArchivoEstadisticas
+   165 00000090 4883F800                    cmp     rax, 0
+   166 00000094 0F8E4B080000                jle     errorApertura
+   167                                  
+   168 0000009A E8410A0000                  call    leerArchivoEstadisticas
+   169 0000009F 4883F800                    cmp     rax, 0
+   170 000000A3 0F8E58080000                jle     errorLeyendoArchivo
+   171 000000A9 E8D40B0000                  call    cargarEstadisticas
+   172 000000AE E8870A0000                  call    cerrarArchivoEstadisticas
+   173                                  
+   174                                  continuar_jugando:
+   175 000000B3 4883EC08                    sub     rsp,8
+   176 000000B7 E8F5000000                  call    ingresar_nombres_y_simbolos_jugadores  ;llamo a la subrutina para ingresar nombres y simbolos
+   177 000000BC 4883C408                    add     rsp,8
+   178                                  
+   179 000000C0 4883EC08                    sub     rsp,8
+   180 000000C4 E8D8010000                  call    construir_tablero       ;llamo a la subrutina para construir el tablero inicial
+   181 000000C9 4883C408                    add     rsp,8
+   182                                  
+   183 000000CD 4883EC08                    sub     rsp,8
+   184 000000D1 E8A6020000                  call    imprimir_tablero        ;llamo a la subrutina para imprimir el tablero
+   185 000000D6 4883C408                    add     rsp,8
+   186                                  
+   187                                  loop_juego:
+   188 000000DA 8A0425[E1010000]            mov     al, [turno]     ; veo de quien es el turno
+   189 000000E1 3C01                        cmp     al, 1
+   190 000000E3 7404                        je turno_zorro          ; si es el turno del zorro, voy a la etiqueta turno_zorro
+   191 000000E5 3C02                        cmp     al, 2
+   192 000000E7 746E                        je turno_ocas           ; si es el turno de las ocas, voy a la etiqueta turno_ocas
+   193                                  
+   194                                  turno_zorro:
+   195 000000E9 4883EC08                    sub     rsp,8
+   196 000000ED E86E040000                  call    verificar_movimientos_zorro  ; Verifico si el zorro tiene movimientos disponibles
+   197 000000F2 4883C408                    add     rsp,8
+   198 000000F6 803C25[6A010000]4E          cmp     byte [input_valido], 'N'  ; Si no tiene movimientos válidos, las ocas ganan
+   199 000000FE 0F84F5080000                je      ganador_ocas
+   200 00000104 4883EC08                    sub     rsp,8
+   201 00000108 E8BD020000                  call    pedir_movimiento_zorro  ;llamo a la subrutina para pedir movimiento del zorro
+   202 0000010D 4883C408                    add     rsp,8
+   203 00000111 803C25[73010000]66          cmp     byte [input_zorro], 'f' ; Verificar si se desea abandonar la partida
+   204 00000119 0F841A080000                je      guardar_partida
+   205 0000011F 4883EC08                    sub     rsp,8
+   206 00000123 E8D1020000                  call    mover_zorro              ;llamo a la subrutina para mover al zorro
+   207 00000128 4883C408                    add     rsp,8
+   208 0000012C 803C25[6A010000]52          cmp     byte [input_valido], 'R'  ;comparo si el movimiento del zorro fue inválido
+   209 00000134 74B3                        je      turno_zorro              ;si fue inválido, vuelvo a pedir movimiento del zorro
+   210 00000136 4883EC08                    sub     rsp, 8
+   211 0000013A E8D50C0000                  call    sumarEstadisticaMovimiento
+   212 0000013F 4883C408                    add     rsp, 8
+   213 00000143 803C25[E2010000]01          cmp     byte [comio_oca], TURNO_ZORRO      ; Si comió una oca, no cambiar de turno
+   214 0000014B 7444                        je      continuar_juego
+   215 0000014D C60425[E1010000]02          mov     byte [turno], TURNO_OCAS          ;si fue válido y no comió oca, cambio el turno a las ocas
+   216 00000155 EB3A                        jmp     continuar_juego          ;voy a la etiqueta continuar_juego
+   217                                  
+   218                                  turno_ocas:
+   219 00000157 4883EC08                    sub     rsp,8
+   220 0000015B E887050000                  call    pedir_movimiento_oca     ;llamo a la subrutina para pedir movimiento de la oca
+   221 00000160 4883C408                    add     rsp,8
+   222 00000164 803C25[5E010000]66          cmp     byte [input_oca], 'f'    ; Verificar si se desea abandonar la partida
+   223 0000016C 0F84C7070000                je      guardar_partida
+   224 00000172 4883EC08                    sub     rsp,8
+   225 00000176 E813060000                  call    mover_oca                ;llamo a la subrutina para mover la oca
+   226 0000017B 4883C408                    add     rsp,8
+   227 0000017F 803C25[6A010000]52          cmp     byte [input_valido], 'R'  ;comparo si el movimiento de la oca fue inválido
+   228 00000187 74CE                        je      turno_ocas               ;si fue inválido, vuelvo a pedir movimiento de la oca
+   229 00000189 C60425[E1010000]01          mov     byte [turno], TURNO_ZORRO          ;si fue válido, cambio el turno al zorro
+   230                                  
+   231                                  continuar_juego:
+   232 00000191 4883EC08                    sub     rsp,8
+   233 00000195 E807010000                  call    construir_tablero       ;reconstruyo el tablero después de cada turno
+   234 0000019A 4883C408                    add     rsp,8
+   235 0000019E 4883EC08                    sub     rsp,8
+   236 000001A2 E8D5010000                  call    imprimir_tablero        ;imprimo el tablero después de cada turno
+   237 000001A7 4883C408                    add     rsp,8
+   238 000001AB E92AFFFFFF                  jmp     loop_juego              ;vuelvo al inicio del bucle del juego
    239                                  
-   240                                  ingresar_nombres_y_simbolos_jugadores:
-   241 000001B1 48BF-                       mov     rdi, mensaje_ingresar_j1   
-   241 000001B3 [1B02000000000000] 
-   242                                      mPuts
+   240 000001B0 C3                          ret
+   241                                  
+   242                                  ingresar_nombres_y_simbolos_jugadores:
+   243 000001B1 48BF-                       mov     rdi, mensaje_ingresar_j1   
+   243 000001B3 [1B02000000000000] 
+   244                                      mPuts
      4 000001BB 4883EC08            <1>  sub rsp,8
      5 000001BF E8(00000000)        <1>  call puts
      6 000001C4 4883C408            <1>  add rsp,8
-   243 000001C8 48BF-                       mov     rdi, nombre_jugador1              ; guardo el nombre de cada jugador
-   243 000001CA [7D01000000000000] 
-   244                                      mGets
+   245 000001C8 48BF-                       mov     rdi, nombre_jugador1              ; guardo el nombre de cada jugador
+   245 000001CA [7D01000000000000] 
+   246                                      mGets
     10 000001D2 4883EC08            <1>  sub rsp,8
     11 000001D6 E8(00000000)        <1>  call gets
     12 000001DB 4883C408            <1>  add rsp,8
-   245 000001DF 48BF-                       mov     rdi, mensaje_ingresar_j2
-   245 000001E1 [4502000000000000] 
-   246                                      mPuts
+   247 000001DF 48BF-                       mov     rdi, mensaje_ingresar_j2
+   247 000001E1 [4502000000000000] 
+   248                                      mPuts
      4 000001E9 4883EC08            <1>  sub rsp,8
      5 000001ED E8(00000000)        <1>  call puts
      6 000001F2 4883C408            <1>  add rsp,8
-   247 000001F6 48BF-                       mov     rdi, nombre_jugador2
-   247 000001F8 [AF01000000000000] 
-   248                                      mGets
+   249 000001F6 48BF-                       mov     rdi, nombre_jugador2
+   249 000001F8 [AF01000000000000] 
+   250                                      mGets
     10 00000200 4883EC08            <1>  sub rsp,8
     11 00000204 E8(00000000)        <1>  call gets
     12 00000209 4883C408            <1>  add rsp,8
-   249 0000020D 48BF-                       mov     rdi, mensaje_ingresar_simbolo_zorro
-   249 0000020F [6E02000000000000] 
-   250                                      mPuts
+   251 0000020D 48BF-                       mov     rdi, mensaje_ingresar_simbolo_zorro
+   251 0000020F [6E02000000000000] 
+   252                                      mPuts
      4 00000217 4883EC08            <1>  sub rsp,8
      5 0000021B E8(00000000)        <1>  call puts
      6 00000220 4883C408            <1>  add rsp,8
-   251 00000224 48BF-                       mov     rdi, simbolo_zorro
-   251 00000226 [3700000000000000] 
-   252 0000022E 48BE-                       mov     rsi, simbolo_zorro
-   252 00000230 [3700000000000000] 
-   253                                      mGets
+   253 00000224 48BF-                       mov     rdi, simbolo_zorro
+   253 00000226 [3700000000000000] 
+   254 0000022E 48BE-                       mov     rsi, simbolo_zorro
+   254 00000230 [3700000000000000] 
+   255                                      mGets
     10 00000238 4883EC08            <1>  sub rsp,8
     11 0000023C E8(00000000)        <1>  call gets
     12 00000241 4883C408            <1>  add rsp,8
-   254 00000245 803C25[37000000]00          cmp     byte [simbolo_zorro], 0   ; verifico si se presiono enter
-   255 0000024D 7508                        jne     skip_default_zorro        ; si no es enter, se utiliza el del usuario que se guardo en simbolo_zorro
-   256 0000024F C60425[37000000]58          mov     byte [simbolo_zorro], 'X' ; se asigna el símbolo por defecto para el zorro, pisando en caso de enter
-   257                                  skip_default_zorro:
-   258 00000257 48BF-                       mov     rdi, mensaje_ingresar_simbolo_oca
-   258 00000259 [B002000000000000] 
-   259                                      mPuts
+   256 00000245 803C25[37000000]00          cmp     byte [simbolo_zorro], 0   ; verifico si se presiono enter
+   257 0000024D 7508                        jne     skip_default_zorro        ; si no es enter, se utiliza el del usuario que se guardo en simbolo_zorro
+   258 0000024F C60425[37000000]58          mov     byte [simbolo_zorro], 'X' ; se asigna el símbolo por defecto para el zorro, pisando en caso de enter
+   259                                  skip_default_zorro:
+   260 00000257 48BF-                       mov     rdi, mensaje_ingresar_simbolo_oca
+   260 00000259 [B002000000000000] 
+   261                                      mPuts
      4 00000261 4883EC08            <1>  sub rsp,8
      5 00000265 E8(00000000)        <1>  call puts
      6 0000026A 4883C408            <1>  add rsp,8
-   260 0000026E 48BF-                       mov     rdi, simbolo_oca
-   260 00000270 [3500000000000000] 
-   261 00000278 48BE-                       mov     rsi, simbolo_oca
-   261 0000027A [3500000000000000] 
-   262                                      mGets
+   262 0000026E 48BF-                       mov     rdi, simbolo_oca
+   262 00000270 [3500000000000000] 
+   263 00000278 48BE-                       mov     rsi, simbolo_oca
+   263 0000027A [3500000000000000] 
+   264                                      mGets
     10 00000282 4883EC08            <1>  sub rsp,8
     11 00000286 E8(00000000)        <1>  call gets
     12 0000028B 4883C408            <1>  add rsp,8
-   263 0000028F 803C25[35000000]00          cmp     byte [simbolo_oca], 0     ; verifico si se presiono enter
-   264 00000297 7508                        jne     construir_tablero          ; si no es enter, se utiliza el del usuario que se guardo en simbolo_oca
-   265 00000299 C60425[35000000]4F          mov     byte [simbolo_oca], 'O'   ; se asigna el símbolo por defecto para las ocas, pisando en caso de enter
-   266                                  
-   267                                  
-   268                                  construir_tablero:
-   269 000002A1 BB01000000                  mov     rbx, 1            ; i que será la fila, iniciada en 1 y no aumenta hasta no terminar las 7 columnas
-   270 000002A6 41BA01000000                mov     r10, 1            ; j que será la columna
-   271 000002AC 48BF-                       mov     rdi, buffer       ; Apuntar al inicio del buffer
-   271 000002AE [0000000000000000] 
-   272                                  
-   273                                  imprimir_siguiente_caracter:   
-   274 000002B6 4889D8                      mov     rax, rbx           ;i
-   275 000002B9 48FFC8                      dec     rax
-   276 000002BC 486BC007                    imul    rax, rax, 7       ; (i-1) * longfila
-   277 000002C0 4C89D2                      mov     rdx, r10          ;j
-   278 000002C3 48FFCA                      dec     rdx
-   279 000002C6 4801D0                      add     rax, rdx          ; (i-1) * longfila + (j-1)
-   280 000002C9 48BE-                       mov     rsi, tablero
-   280 000002CB [0000000000000000] 
-   281 000002D3 4801C6                      add     rsi, rax          ; rsi apunta a la posición actual en el tablero
-   282                                  
-   283 000002D6 803E00                      cmp     byte [rsi], 0      ;segun el numero en tablero imprimo un caracter distinto
-   284 000002D9 740F                        je      imprimir_fuera_tablero                
-   285 000002DB 803E02                      cmp     byte [rsi], 2           
-   286 000002DE 7458                        je      imprimir_espacio_vacio              
-   287 000002E0 803E01                      cmp     byte [rsi], 1         
-   288 000002E3 741F                        je      imprimir_oca
-   289 000002E5 803E03                      cmp     byte [rsi], 3
-   290 000002E8 7434                        je      imprimir_zorro
-   291                                  
-   292                                  imprimir_fuera_tablero:
-   293 000002EA 8A0425[3B000000]            mov     al, [simbolo_separador]
-   294 000002F1 AA                          stosb                               ;almaceno e incremento el rdi
-   295 000002F2 8A0425[33000000]            mov     al, [simbolo_fuera_tablero]
-   296 000002F9 AA                          stosb
-   297 000002FA 8A0425[3B000000]            mov     al, [simbolo_separador]
-   298 00000301 AA                          stosb
-   299 00000302 EB4E                        jmp     continuar_construyendo_tablero
-   300                                  
-   301                                  imprimir_oca:
-   302 00000304 8A0425[3B000000]            mov     al, [simbolo_separador]
-   303 0000030B AA                          stosb
-   304 0000030C 8A0425[35000000]            mov     al, [simbolo_oca]
-   305 00000313 AA                          stosb
-   306 00000314 8A0425[3B000000]            mov     al, [simbolo_separador]
-   307 0000031B AA                          stosb
-   308 0000031C EB34                        jmp     continuar_construyendo_tablero
-   309                                  
-   310                                  imprimir_zorro:
-   311 0000031E 8A0425[3B000000]            mov     al, [simbolo_separador]
-   312 00000325 AA                          stosb
-   313 00000326 8A0425[37000000]            mov     al, [simbolo_zorro]
-   314 0000032D AA                          stosb
-   315 0000032E 8A0425[3B000000]            mov     al, [simbolo_separador]
-   316 00000335 AA                          stosb
-   317 00000336 EB1A                        jmp     continuar_construyendo_tablero
-   318                                  
-   319                                  imprimir_espacio_vacio:
-   320 00000338 8A0425[3B000000]            mov     al, [simbolo_separador]
-   321 0000033F AA                          stosb
-   322 00000340 8A0425[39000000]            mov     al, [simbolo_espacio_vacio]
-   323 00000347 AA                          stosb
-   324 00000348 8A0425[3B000000]            mov     al, [simbolo_separador]
-   325 0000034F AA                          stosb
-   326 00000350 EB00                        jmp     continuar_construyendo_tablero
-   327                                  
-   328                                  continuar_construyendo_tablero:
-   329 00000352 49FFC2                      inc     r10                ; Incrementar en uno para tener la siguiente columna
-   330 00000355 4983FA08                    cmp     r10, 8             ; Si no llegué a la columna 7, construyo el siguiente elemento de la misma fila              
-   331 00000359 0F8C57FFFFFF                jl      imprimir_siguiente_caracter       
-   332                                  
-   333                                      ; Añadir un salto de línea al final de la fila
-   334 0000035F 8A0425[31000000]            mov     al, [salto_linea]
-   335 00000366 AA                          stosb
-   336 00000367 41BA01000000                mov     r10, 1
-   337 0000036D 48FFC3                      inc     rbx                ; Incremento en uno la fila (siguiente fila)
-   338 00000370 4883FB08                    cmp     rbx, 8             ; Si llegué a la fila 7, termino la construcción
-   339 00000374 7405                        je      fin_construir_tablero
-   340                                  
-   341 00000376 E93BFFFFFF                  jmp     imprimir_siguiente_caracter
+   265 0000028F 803C25[35000000]00          cmp     byte [simbolo_oca], 0     ; verifico si se presiono enter
+   266 00000297 7508                        jne     construir_tablero          ; si no es enter, se utiliza el del usuario que se guardo en simbolo_oca
+   267 00000299 C60425[35000000]4F          mov     byte [simbolo_oca], 'O'   ; se asigna el símbolo por defecto para las ocas, pisando en caso de enter
+   268                                  
+   269                                  
+   270                                  construir_tablero:
+   271 000002A1 BB01000000                  mov     rbx, 1            ; i que será la fila, iniciada en 1 y no aumenta hasta no terminar las 7 columnas
+   272 000002A6 41BA01000000                mov     r10, 1            ; j que será la columna
+   273 000002AC 48BF-                       mov     rdi, buffer       ; Apuntar al inicio del buffer
+   273 000002AE [0000000000000000] 
+   274                                  
+   275                                  imprimir_siguiente_caracter:   
+   276 000002B6 4889D8                      mov     rax, rbx           ;i
+   277 000002B9 48FFC8                      dec     rax
+   278 000002BC 486BC007                    imul    rax, rax, 7       ; (i-1) * longfila
+   279 000002C0 4C89D2                      mov     rdx, r10          ;j
+   280 000002C3 48FFCA                      dec     rdx
+   281 000002C6 4801D0                      add     rax, rdx          ; (i-1) * longfila + (j-1)
+   282 000002C9 48BE-                       mov     rsi, tablero
+   282 000002CB [0000000000000000] 
+   283 000002D3 4801C6                      add     rsi, rax          ; rsi apunta a la posición actual en el tablero
+   284                                  
+   285 000002D6 803E00                      cmp     byte [rsi], 0      ;segun el numero en tablero imprimo un caracter distinto
+   286 000002D9 740F                        je      imprimir_fuera_tablero                
+   287 000002DB 803E02                      cmp     byte [rsi], 2           
+   288 000002DE 7458                        je      imprimir_espacio_vacio              
+   289 000002E0 803E01                      cmp     byte [rsi], 1         
+   290 000002E3 741F                        je      imprimir_oca
+   291 000002E5 803E03                      cmp     byte [rsi], 3
+   292 000002E8 7434                        je      imprimir_zorro
+   293                                  
+   294                                  imprimir_fuera_tablero:
+   295 000002EA 8A0425[3B000000]            mov     al, [simbolo_separador]
+   296 000002F1 AA                          stosb                               ;almaceno e incremento el rdi
+   297 000002F2 8A0425[33000000]            mov     al, [simbolo_fuera_tablero]
+   298 000002F9 AA                          stosb
+   299 000002FA 8A0425[3B000000]            mov     al, [simbolo_separador]
+   300 00000301 AA                          stosb
+   301 00000302 EB4E                        jmp     continuar_construyendo_tablero
+   302                                  
+   303                                  imprimir_oca:
+   304 00000304 8A0425[3B000000]            mov     al, [simbolo_separador]
+   305 0000030B AA                          stosb
+   306 0000030C 8A0425[35000000]            mov     al, [simbolo_oca]
+   307 00000313 AA                          stosb
+   308 00000314 8A0425[3B000000]            mov     al, [simbolo_separador]
+   309 0000031B AA                          stosb
+   310 0000031C EB34                        jmp     continuar_construyendo_tablero
+   311                                  
+   312                                  imprimir_zorro:
+   313 0000031E 8A0425[3B000000]            mov     al, [simbolo_separador]
+   314 00000325 AA                          stosb
+   315 00000326 8A0425[37000000]            mov     al, [simbolo_zorro]
+   316 0000032D AA                          stosb
+   317 0000032E 8A0425[3B000000]            mov     al, [simbolo_separador]
+   318 00000335 AA                          stosb
+   319 00000336 EB1A                        jmp     continuar_construyendo_tablero
+   320                                  
+   321                                  imprimir_espacio_vacio:
+   322 00000338 8A0425[3B000000]            mov     al, [simbolo_separador]
+   323 0000033F AA                          stosb
+   324 00000340 8A0425[39000000]            mov     al, [simbolo_espacio_vacio]
+   325 00000347 AA                          stosb
+   326 00000348 8A0425[3B000000]            mov     al, [simbolo_separador]
+   327 0000034F AA                          stosb
+   328 00000350 EB00                        jmp     continuar_construyendo_tablero
+   329                                  
+   330                                  continuar_construyendo_tablero:
+   331 00000352 49FFC2                      inc     r10                ; Incrementar en uno para tener la siguiente columna
+   332 00000355 4983FA08                    cmp     r10, 8             ; Si no llegué a la columna 7, construyo el siguiente elemento de la misma fila              
+   333 00000359 0F8C57FFFFFF                jl      imprimir_siguiente_caracter       
+   334                                  
+   335                                      ; Añadir un salto de línea al final de la fila
+   336 0000035F 8A0425[31000000]            mov     al, [salto_linea]
+   337 00000366 AA                          stosb
+   338 00000367 41BA01000000                mov     r10, 1
+   339 0000036D 48FFC3                      inc     rbx                ; Incremento en uno la fila (siguiente fila)
+   340 00000370 4883FB08                    cmp     rbx, 8             ; Si llegué a la fila 7, termino la construcción
+   341 00000374 7405                        je      fin_construir_tablero
    342                                  
-   343                                  fin_construir_tablero:
-   344 0000037B C3                          ret
-   345                                  
-   346                                  imprimir_tablero:
-   347 0000037C 48BF-                       mov     rdi, buffer
-   347 0000037E [0000000000000000] 
-   348                                      mPuts
+   343 00000376 E93BFFFFFF                  jmp     imprimir_siguiente_caracter
+   344                                  
+   345                                  fin_construir_tablero:
+   346 0000037B C3                          ret
+   347                                  
+   348                                  imprimir_tablero:
+   349 0000037C 48BF-                       mov     rdi, buffer
+   349 0000037E [0000000000000000] 
+   350                                      mPuts
      4 00000386 4883EC08            <1>  sub rsp,8
      5 0000038A E8(00000000)        <1>  call puts
      6 0000038F 4883C408            <1>  add rsp,8
-   349 00000393 48BF-                       mov rdi, mensaje_ocas_eliminadas
-   349 00000395 [2203000000000000] 
-   350 0000039D 488B3425[38030000]          mov rsi, [cantidad_ocas_eliminadas]
-   351                                      mPrintF
+   351 00000393 48BF-                       mov rdi, mensaje_ocas_eliminadas
+   351 00000395 [2203000000000000] 
+   352 0000039D 488B3425[38030000]          mov rsi, [cantidad_ocas_eliminadas]
+   353                                      mPrintF
     16 000003A5 4883EC08            <1>  sub rsp,8
     17 000003A9 E8(00000000)        <1>  call printf
     18 000003AE 4883C408            <1>  add rsp,8
-   352 000003B2 48BF-                       mov rdi, salto_linea
-   352 000003B4 [3100000000000000] 
-   353                                      mPuts
+   354 000003B2 48BF-                       mov rdi, salto_linea
+   354 000003B4 [3100000000000000] 
+   355                                      mPuts
      4 000003BC 4883EC08            <1>  sub rsp,8
      5 000003C0 E8(00000000)        <1>  call puts
      6 000003C5 4883C408            <1>  add rsp,8
-   354 000003C9 C3                          ret
-   355                                  
-   356                                  pedir_movimiento_zorro:
-   357 000003CA 48BF-                       mov rdi, mensaje_mover_zorro
-   357 000003CC [3D01000000000000] 
-   358                                      mPuts
+   356 000003C9 C3                          ret
+   357                                  
+   358                                  pedir_movimiento_zorro:
+   359 000003CA 48BF-                       mov rdi, mensaje_mover_zorro
+   359 000003CC [3D01000000000000] 
+   360                                      mPuts
      4 000003D4 4883EC08            <1>  sub rsp,8
      5 000003D8 E8(00000000)        <1>  call puts
      6 000003DD 4883C408            <1>  add rsp,8
-   359 000003E1 48BF-                       mov rdi, input_zorro
-   359 000003E3 [7301000000000000] 
-   360                                      mGets
+   361 000003E1 48BF-                       mov rdi, input_zorro
+   361 000003E3 [7301000000000000] 
+   362                                      mGets
     10 000003EB 4883EC08            <1>  sub rsp,8
     11 000003EF E8(00000000)        <1>  call gets
     12 000003F4 4883C408            <1>  add rsp,8
-   361 000003F8 C3                          ret
-   362                                  
-   363                                  mover_zorro:
-   364 000003F9 48BE-                       mov rsi, tablero
-   364 000003FB [0000000000000000] 
-   365 00000403 B931000000                  mov rcx, 49
-   366                                  
-   367                                  buscar_zorro:
-   368 00000408 AC                          lodsb       ;apunto al siguiente y lo cargo en al
-   369 00000409 3C03                        cmp al, 3
-   370 0000040B 7403                        je zorro_encontrado
-   371 0000040D E2F9                        loop buscar_zorro
-   372 0000040F C3                          ret
-   373                                  
-   374                                  zorro_encontrado:
-   375 00000410 4889F3                      mov rbx, rsi   ; Mueve el valor del registro rsi (posición actual del zorro) a rbx
-   376 00000413 48FFCB                      dec rbx         ; Decrementa rbx en 1 para apuntar correctamente a la posición actual del zorro
-   377                                  
-   378 00000416 48BF-                       mov rdi, input_zorro
-   378 00000418 [7301000000000000] 
-   379 00000420 8A07                        mov al, [rdi]
-   380 00000422 3C77                        cmp al, 'w'
-   381 00000424 7439                        je mover_zorro_arriba
-   382 00000426 3C73                        cmp al, 's'
-   383 00000428 7442                        je mover_zorro_abajo
-   384 0000042A 3C61                        cmp al, 'a'
-   385 0000042C 7449                        je mover_zorro_izquierda
-   386 0000042E 3C64                        cmp al, 'd'
-   387 00000430 7451                        je mover_zorro_derecha
-   388 00000432 3C65                        cmp al, 'e'
-   389 00000434 7457                        je mover_zorro_arriba_derecha
-   390 00000436 3C71                        cmp al, 'q'
-   391 00000438 7460                        je mover_zorro_arriba_izquierda
-   392 0000043A 3C7A                        cmp al, 'z'
-   393 0000043C 7469                        je mover_zorro_abajo_izquierda
-   394 0000043E 3C78                        cmp al, 'x'
-   395 00000440 7470                        je mover_zorro_abajo_derecha
-   396 00000442 48BF-                       mov rdi, mensaje_error_input
-   396 00000444 [0401000000000000] 
-   397                                      mPuts
+   363 000003F8 C3                          ret
+   364                                  
+   365                                  mover_zorro:
+   366 000003F9 48BE-                       mov rsi, tablero
+   366 000003FB [0000000000000000] 
+   367 00000403 B931000000                  mov rcx, 49
+   368                                  
+   369                                  buscar_zorro:
+   370 00000408 AC                          lodsb       ;apunto al siguiente y lo cargo en al
+   371 00000409 3C03                        cmp al, 3
+   372 0000040B 7403                        je zorro_encontrado
+   373 0000040D E2F9                        loop buscar_zorro
+   374 0000040F C3                          ret
+   375                                  
+   376                                  zorro_encontrado:
+   377 00000410 4889F3                      mov rbx, rsi   ; Mueve el valor del registro rsi (posición actual del zorro) a rbx
+   378 00000413 48FFCB                      dec rbx         ; Decrementa rbx en 1 para apuntar correctamente a la posición actual del zorro
+   379                                  
+   380 00000416 48BF-                       mov rdi, input_zorro
+   380 00000418 [7301000000000000] 
+   381 00000420 8A07                        mov al, [rdi]
+   382 00000422 3C77                        cmp al, 'w'
+   383 00000424 7439                        je mover_zorro_arriba
+   384 00000426 3C73                        cmp al, 's'
+   385 00000428 7442                        je mover_zorro_abajo
+   386 0000042A 3C61                        cmp al, 'a'
+   387 0000042C 7449                        je mover_zorro_izquierda
+   388 0000042E 3C64                        cmp al, 'd'
+   389 00000430 7451                        je mover_zorro_derecha
+   390 00000432 3C65                        cmp al, 'e'
+   391 00000434 7457                        je mover_zorro_arriba_derecha
+   392 00000436 3C71                        cmp al, 'q'
+   393 00000438 7460                        je mover_zorro_arriba_izquierda
+   394 0000043A 3C7A                        cmp al, 'z'
+   395 0000043C 7469                        je mover_zorro_abajo_izquierda
+   396 0000043E 3C78                        cmp al, 'x'
+   397 00000440 7470                        je mover_zorro_abajo_derecha
+   398 00000442 48BF-                       mov rdi, mensaje_error_input
+   398 00000444 [0401000000000000] 
+   399                                      mPuts
      4 0000044C 4883EC08            <1>  sub rsp,8
      5 00000450 E8(00000000)        <1>  call puts
      6 00000455 4883C408            <1>  add rsp,8
-   398 00000459 E98BFCFFFF                  jmp turno_zorro
-   399 0000045E C3                          ret
-   400                                  
-   401                                  mover_zorro_arriba:
-   402 0000045F 4883EB07                    sub rbx, 7                  ; resto 7 a rbx para mover al zorro una fila hacia arriba
-   403 00000463 48C7C7F9FFFFFF              mov rdi, -7                 ; la dirección del desplazamiento es -7
-   404 0000046A EB51                        jmp validar_movimiento_zorro 
-   405                                  
-   406                                  mover_zorro_abajo:
-   407 0000046C 4883C307                    add rbx, 7                  ; sumo 7 a rbx para mover al zorro una fila hacia abajo
-   408 00000470 BF07000000                  mov rdi, 7                  ; la dirección del desplazamiento es 7
-   409 00000475 EB46                        jmp validar_movimiento_zorro
-   410                                  
-   411                                  mover_zorro_izquierda:
-   412 00000477 48FFCB                      dec rbx                     ; resto 1 a rbx para mover al zorro una columna a la izquierda
-   413 0000047A 48C7C7FFFFFFFF              mov rdi, -1                 ; la dirección del desplazamiento es -1
-   414 00000481 EB3A                        jmp validar_movimiento_zorro
-   415                                  
-   416                                  mover_zorro_derecha:
-   417 00000483 48FFC3                      inc rbx                     ; sumo 1 a rbx para mover al zorro una columna a la derecha
-   418 00000486 BF01000000                  mov rdi, 1                  ; la dirección del desplazamiento es 1
-   419 0000048B EB30                        jmp validar_movimiento_zorro
-   420                                  
-   421                                  mover_zorro_arriba_derecha:
-   422 0000048D 4883EB06                    sub rbx, 6                  ; resto 6 a rbx para mover al zorro en diagonal arriba derecha
-   423 00000491 48C7C7FAFFFFFF              mov rdi, -6                 ; la dirección del desplazamiento es -6
-   424 00000498 EB23                        jmp validar_movimiento_zorro
-   425                                  
-   426                                  mover_zorro_arriba_izquierda:
-   427 0000049A 4883EB08                    sub rbx, 8                  ; resto 8 a rbx para mover al zorro en diagonal arriba izquierda
-   428 0000049E 48C7C7F8FFFFFF              mov rdi, -8                 ; la dirección del desplazamiento es -8
-   429 000004A5 EB16                        jmp validar_movimiento_zorro
-   430                                  
-   431                                  mover_zorro_abajo_izquierda:
-   432 000004A7 4883C306                    add rbx, 6                  ; sumo 6 a rbx para mover al zorro en diagonal abajo izquierda
-   433 000004AB BF06000000                  mov rdi, 6                  ; la dirección del desplazamiento es 6
-   434 000004B0 EB0B                        jmp validar_movimiento_zorro
-   435                                  
-   436                                  mover_zorro_abajo_derecha:
-   437 000004B2 4883C308                    add rbx, 8                  ; sumo 8 a rbx para mover al zorro en diagonal abajo derecha
-   438 000004B6 BF08000000                  mov rdi, 8                  ; la dirección del desplazamiento es 8
-   439 000004BB EB00                        jmp validar_movimiento_zorro
-   440                                  
-   441                                  validar_movimiento_zorro:
-   442 000004BD 803B02                      cmp byte [rbx], 2           ; Comparar destino con una posición vacía (2)
-   443 000004C0 7518                        jne verificar_si_oca       ; Si no está vacía, verificar si se puede comer una oca
-   444 000004C2 C646FF02                    mov byte [rsi - 1], 2       ; Actualizar la posición anterior del zorro con 2 (vacío)
-   445 000004C6 C60303                      mov byte [rbx], 3           ; Colocar al zorro en la nueva posición
-   446 000004C9 C60425[E2010000]00          mov byte [comio_oca], 0     ; Indicar que no comió oca
-   447 000004D1 C60425[6A010000]53          mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
-   448 000004D9 C3                          ret
-   449                                  
-   450                                  verificar_si_oca:
-   451 000004DA 803B01                      cmp byte [rbx], 1           ; Comparar destino con una oca (1)
-   452 000004DD 7561                        jne movimiento_invalido_zorro ; Si no es una oca, el movimiento es inválido
-   453 000004DF EB00                        jmp validar_comer_oca       ; Ir a validar si se puede comer la oca
-   454                                  
-   455                                  validar_comer_oca:
-   456                                      ; Verificar si hay una oca en la posición intermedia
-   457                                      ; RDI contiene la dirección del desplazamiento
-   458 000004E1 4889D8                      mov rax, rbx
-   459 000004E4 4801F8                      add rax, rdi
-   460 000004E7 803802                      cmp byte [rax], 2           ; Verificar si la posición de salto está vacía
-   461 000004EA 7554                        jne movimiento_invalido_zorro
-   462                                      ; Mover el zorro a la posición de salto
-   463 000004EC C646FF02                    mov byte [rsi - 1], 2       ; Actualizar la posición anterior del zorro con 2 (vacío)
-   464 000004F0 C60003                      mov byte [rax], 3           ; Colocar el zorro en la nueva posición de salto
-   465                                      ; Borrar la oca que fue comida
-   466 000004F3 4829F8                      sub rax, rdi
-   467 000004F6 C60002                      mov byte [rax], 2
-   468 000004F9 48830425[38030000]-         add qword [cantidad_ocas_eliminadas], 1 ;aumento en uno la cantidad de ocas eliminadas
-   468 00000501 01                 
-   469 00000502 48833C25[38030000]-         cmp qword [cantidad_ocas_eliminadas], 12  ;si gana el zorro
-   469 0000050A 0C                 
-   470 0000050B 0F84C5040000                je ganador_zorro
-   471 00000511 C60425[6A010000]53          mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
-   472 00000519 C60425[E2010000]01          mov byte [comio_oca], 1     ; Indicar que el zorro comió una oca
-   473                                      ; Reconstruir e imprimir el tablero para reflejar el estado actual
-   474 00000521 4883EC08                    sub     rsp,8
-   475 00000525 E877FDFFFF                  call    construir_tablero
-   476 0000052A 4883C408                    add     rsp,8
-   477 0000052E 4883EC08                    sub     rsp,8
-   478 00000532 E845FEFFFF                  call    imprimir_tablero
-   479 00000537 4883C408                    add     rsp,8
-   480 0000053B E9A9FBFFFF                  jmp turno_zorro             ; Continuar el turno del zorro
-   481                                  
-   482                                  movimiento_invalido_zorro:
-   483 00000540 C60425[6A010000]52          mov byte [input_valido], 'R'
-   484 00000548 48BF-                       mov rdi, mensaje_mov_invalido
-   484 0000054A [F301000000000000] 
-   485                                      mPuts
+   400 00000459 E98BFCFFFF                  jmp turno_zorro
+   401 0000045E C3                          ret
+   402                                  
+   403                                  mover_zorro_arriba:
+   404 0000045F 4883EB07                    sub rbx, 7                  ; resto 7 a rbx para mover al zorro una fila hacia arriba
+   405 00000463 48C7C7F9FFFFFF              mov rdi, -7                 ; la dirección del desplazamiento es -7
+   406 0000046A EB51                        jmp validar_movimiento_zorro 
+   407                                  
+   408                                  mover_zorro_abajo:
+   409 0000046C 4883C307                    add rbx, 7                  ; sumo 7 a rbx para mover al zorro una fila hacia abajo
+   410 00000470 BF07000000                  mov rdi, 7                  ; la dirección del desplazamiento es 7
+   411 00000475 EB46                        jmp validar_movimiento_zorro
+   412                                  
+   413                                  mover_zorro_izquierda:
+   414 00000477 48FFCB                      dec rbx                     ; resto 1 a rbx para mover al zorro una columna a la izquierda
+   415 0000047A 48C7C7FFFFFFFF              mov rdi, -1                 ; la dirección del desplazamiento es -1
+   416 00000481 EB3A                        jmp validar_movimiento_zorro
+   417                                  
+   418                                  mover_zorro_derecha:
+   419 00000483 48FFC3                      inc rbx                     ; sumo 1 a rbx para mover al zorro una columna a la derecha
+   420 00000486 BF01000000                  mov rdi, 1                  ; la dirección del desplazamiento es 1
+   421 0000048B EB30                        jmp validar_movimiento_zorro
+   422                                  
+   423                                  mover_zorro_arriba_derecha:
+   424 0000048D 4883EB06                    sub rbx, 6                  ; resto 6 a rbx para mover al zorro en diagonal arriba derecha
+   425 00000491 48C7C7FAFFFFFF              mov rdi, -6                 ; la dirección del desplazamiento es -6
+   426 00000498 EB23                        jmp validar_movimiento_zorro
+   427                                  
+   428                                  mover_zorro_arriba_izquierda:
+   429 0000049A 4883EB08                    sub rbx, 8                  ; resto 8 a rbx para mover al zorro en diagonal arriba izquierda
+   430 0000049E 48C7C7F8FFFFFF              mov rdi, -8                 ; la dirección del desplazamiento es -8
+   431 000004A5 EB16                        jmp validar_movimiento_zorro
+   432                                  
+   433                                  mover_zorro_abajo_izquierda:
+   434 000004A7 4883C306                    add rbx, 6                  ; sumo 6 a rbx para mover al zorro en diagonal abajo izquierda
+   435 000004AB BF06000000                  mov rdi, 6                  ; la dirección del desplazamiento es 6
+   436 000004B0 EB0B                        jmp validar_movimiento_zorro
+   437                                  
+   438                                  mover_zorro_abajo_derecha:
+   439 000004B2 4883C308                    add rbx, 8                  ; sumo 8 a rbx para mover al zorro en diagonal abajo derecha
+   440 000004B6 BF08000000                  mov rdi, 8                  ; la dirección del desplazamiento es 8
+   441 000004BB EB00                        jmp validar_movimiento_zorro
+   442                                  
+   443                                  validar_movimiento_zorro:
+   444 000004BD 803B02                      cmp byte [rbx], 2           ; Comparar destino con una posición vacía (2)
+   445 000004C0 7518                        jne verificar_si_oca       ; Si no está vacía, verificar si se puede comer una oca
+   446 000004C2 C646FF02                    mov byte [rsi - 1], 2       ; Actualizar la posición anterior del zorro con 2 (vacío)
+   447 000004C6 C60303                      mov byte [rbx], 3           ; Colocar al zorro en la nueva posición
+   448 000004C9 C60425[E2010000]00          mov byte [comio_oca], 0     ; Indicar que no comió oca
+   449 000004D1 C60425[6A010000]53          mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
+   450 000004D9 C3                          ret
+   451                                  
+   452                                  verificar_si_oca:
+   453 000004DA 803B01                      cmp byte [rbx], 1           ; Comparar destino con una oca (1)
+   454 000004DD 7561                        jne movimiento_invalido_zorro ; Si no es una oca, el movimiento es inválido
+   455 000004DF EB00                        jmp validar_comer_oca       ; Ir a validar si se puede comer la oca
+   456                                  
+   457                                  validar_comer_oca:
+   458                                      ; Verificar si hay una oca en la posición intermedia
+   459                                      ; RDI contiene la dirección del desplazamiento
+   460 000004E1 4889D8                      mov rax, rbx
+   461 000004E4 4801F8                      add rax, rdi
+   462 000004E7 803802                      cmp byte [rax], 2           ; Verificar si la posición de salto está vacía
+   463 000004EA 7554                        jne movimiento_invalido_zorro
+   464                                      ; Mover el zorro a la posición de salto
+   465 000004EC C646FF02                    mov byte [rsi - 1], 2       ; Actualizar la posición anterior del zorro con 2 (vacío)
+   466 000004F0 C60003                      mov byte [rax], 3           ; Colocar el zorro en la nueva posición de salto
+   467                                      ; Borrar la oca que fue comida
+   468 000004F3 4829F8                      sub rax, rdi
+   469 000004F6 C60002                      mov byte [rax], 2
+   470 000004F9 48830425[38030000]-         add qword [cantidad_ocas_eliminadas], 1 ;aumento en uno la cantidad de ocas eliminadas
+   470 00000501 01                 
+   471 00000502 48833C25[38030000]-         cmp qword [cantidad_ocas_eliminadas], 12  ;si gana el zorro
+   471 0000050A 0C                 
+   472 0000050B 0F84C5040000                je ganador_zorro
+   473 00000511 C60425[6A010000]53          mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
+   474 00000519 C60425[E2010000]01          mov byte [comio_oca], 1     ; Indicar que el zorro comió una oca
+   475                                      ; Reconstruir e imprimir el tablero para reflejar el estado actual
+   476 00000521 4883EC08                    sub     rsp,8
+   477 00000525 E877FDFFFF                  call    construir_tablero
+   478 0000052A 4883C408                    add     rsp,8
+   479 0000052E 4883EC08                    sub     rsp,8
+   480 00000532 E845FEFFFF                  call    imprimir_tablero
+   481 00000537 4883C408                    add     rsp,8
+   482 0000053B E9A9FBFFFF                  jmp turno_zorro             ; Continuar el turno del zorro
+   483                                  
+   484                                  movimiento_invalido_zorro:
+   485 00000540 C60425[6A010000]52          mov byte [input_valido], 'R'
+   486 00000548 48BF-                       mov rdi, mensaje_mov_invalido
+   486 0000054A [F301000000000000] 
+   487                                      mPuts
      4 00000552 4883EC08            <1>  sub rsp,8
      5 00000556 E8(00000000)        <1>  call puts
      6 0000055B 4883C408            <1>  add rsp,8
-   486 0000055F C3                          ret
-   487                                  
-   488                                  verificar_movimientos_zorro:
-   489 00000560 48BE-                       mov rsi, tablero
-   489 00000562 [0000000000000000] 
-   490 0000056A B931000000                  mov rcx, 49
-   491                                  
-   492                                  buscar_zorro_verificacion_mov:
-   493 0000056F AC                          lodsb
-   494 00000570 3C03                        cmp al, 3
-   495 00000572 7403                        je zorro_encontrado_verificar
-   496 00000574 E2F9                        loop buscar_zorro_verificacion_mov
-   497 00000576 C3                          ret
-   498                                  
-   499                                  zorro_encontrado_verificar:
-   500 00000577 4889F3                      mov rbx, rsi   ; Mueve el valor del registro rsi (posición actual del zorro) a rbx
-   501 0000057A 48FFCB                      dec rbx         ; Decrementa rbx en 1 para apuntar correctamente a la posición actual del zorro
-   502                                  
-   503                                      ; Verificar todas las direcciones alrededor del zorro (cercanas)
-   504 0000057D 4889DF                      mov rdi, rbx
-   505 00000580 4883EF07                    sub rdi, 7
-   506 00000584 E84F010000                  call verificar_casillero
-   507 00000589 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   508 00000591 0F8447010000                je movimiento_valido
-   509                                  
-   510 00000597 4889DF                      mov rdi, rbx
-   511 0000059A 4883C707                    add rdi, 7
-   512 0000059E E835010000                  call verificar_casillero
-   513 000005A3 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   514 000005AB 0F842D010000                je movimiento_valido
-   515                                  
-   516 000005B1 4889DF                      mov rdi, rbx
-   517 000005B4 48FFCF                      dec rdi
-   518 000005B7 E81C010000                  call verificar_casillero
-   519 000005BC 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   520 000005C4 0F8414010000                je movimiento_valido
-   521                                  
-   522 000005CA 4889DF                      mov rdi, rbx
-   523 000005CD 48FFC7                      inc rdi
-   524 000005D0 E803010000                  call verificar_casillero
-   525 000005D5 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   526 000005DD 0F84FB000000                je movimiento_valido
-   527                                  
-   528 000005E3 4889DF                      mov rdi, rbx
-   529 000005E6 4883EF06                    sub rdi, 6
-   530 000005EA E8E9000000                  call verificar_casillero
-   531 000005EF 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   532 000005F7 0F84E1000000                je movimiento_valido
-   533                                  
-   534 000005FD 4889DF                      mov rdi, rbx
-   535 00000600 4883EF08                    sub rdi, 8
-   536 00000604 E8CF000000                  call verificar_casillero
-   537 00000609 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   538 00000611 0F84C7000000                je movimiento_valido
-   539                                  
-   540 00000617 4889DF                      mov rdi, rbx
-   541 0000061A 4883C706                    add rdi, 6
-   542 0000061E E8B5000000                  call verificar_casillero
-   543 00000623 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   544 0000062B 0F84AD000000                je movimiento_valido
-   545                                  
-   546 00000631 4889DF                      mov rdi, rbx
-   547 00000634 4883C708                    add rdi, 8
-   548 00000638 E89B000000                  call verificar_casillero
-   549 0000063D 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   550 00000645 0F8493000000                je movimiento_valido
-   551                                  
-   552                                      ; Verificar las posiciones más alejadas (dos espacios en cada dirección)
-   553 0000064B 4889DF                      mov rdi, rbx
-   554 0000064E 4883EF0E                    sub rdi, 14  ; dos espacios hacia arriba-izquierda
-   555 00000652 E881000000                  call verificar_casillero
-   556 00000657 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   557 0000065F 747D                        je movimiento_valido
-   558                                  
-   559 00000661 4889DF                      mov rdi, rbx
-   560 00000664 4883EF0C                    sub rdi, 12  ; dos espacios hacia arriba-derecha
-   561 00000668 E86B000000                  call verificar_casillero
-   562 0000066D 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   563 00000675 7467                        je movimiento_valido
-   564                                  
-   565 00000677 4889DF                      mov rdi, rbx
-   566 0000067A 4883C70C                    add rdi, 12  ; dos espacios hacia abajo-izquierda
-   567 0000067E E855000000                  call verificar_casillero
-   568 00000683 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   569 0000068B 7451                        je movimiento_valido
-   570                                  
-   571 0000068D 4889DF                      mov rdi, rbx
-   572 00000690 4883C70E                    add rdi, 14  ; dos espacios hacia abajo-derecha
-   573 00000694 E83F000000                  call verificar_casillero
-   574 00000699 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   575 000006A1 743B                        je movimiento_valido
-   576                                  
-   577 000006A3 4889DF                      mov rdi, rbx
-   578 000006A6 4883EF0E                    sub rdi, 14  ; dos espacios hacia arriba
-   579 000006AA E829000000                  call verificar_casillero
-   580 000006AF 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   581 000006B7 7425                        je movimiento_valido
-   582                                  
-   583 000006B9 4889DF                      mov rdi, rbx
-   584 000006BC 4883C70E                    add rdi, 14  ; dos espacios hacia abajo
-   585 000006C0 E813000000                  call verificar_casillero
-   586 000006C5 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   587 000006CD 740F                        je movimiento_valido
-   588                                  
-   589                                      ; Si no hay movimientos válidos
-   590 000006CF C60425[6A010000]4E          mov byte [input_valido], 'N'
-   591 000006D7 C3                          ret
-   592                                  
-   593                                  verificar_casillero:
-   594 000006D8 803F02                      cmp byte [rdi], 2  ; Verificar si el casillero es vacío (2)
-   595 000006DB 7401                        je movimiento_valido
-   596 000006DD C3                          ret
-   597                                  
-   598                                  movimiento_valido:
-   599 000006DE C60425[6A010000]53          mov byte [input_valido], 'S'
-   600 000006E6 C3                          ret
-   601                                  
-   602                                  pedir_movimiento_oca:
-   603 000006E7 48BF-                       mov rdi, mensaje_mover_oca
-   603 000006E9 [3D00000000000000] 
-   604                                      mPuts
+   488 0000055F C3                          ret
+   489                                  
+   490                                  verificar_movimientos_zorro:
+   491 00000560 48BE-                       mov rsi, tablero
+   491 00000562 [0000000000000000] 
+   492 0000056A B931000000                  mov rcx, 49
+   493                                  
+   494                                  buscar_zorro_verificacion_mov:
+   495 0000056F AC                          lodsb
+   496 00000570 3C03                        cmp al, 3
+   497 00000572 7403                        je zorro_encontrado_verificar
+   498 00000574 E2F9                        loop buscar_zorro_verificacion_mov
+   499 00000576 C3                          ret
+   500                                  
+   501                                  zorro_encontrado_verificar:
+   502 00000577 4889F3                      mov rbx, rsi   ; Mueve el valor del registro rsi (posición actual del zorro) a rbx
+   503 0000057A 48FFCB                      dec rbx         ; Decrementa rbx en 1 para apuntar correctamente a la posición actual del zorro
+   504                                  
+   505                                      ; Verificar todas las direcciones alrededor del zorro (cercanas)
+   506 0000057D 4889DF                      mov rdi, rbx
+   507 00000580 4883EF07                    sub rdi, 7
+   508 00000584 E84F010000                  call verificar_casillero
+   509 00000589 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   510 00000591 0F8447010000                je movimiento_valido
+   511                                  
+   512 00000597 4889DF                      mov rdi, rbx
+   513 0000059A 4883C707                    add rdi, 7
+   514 0000059E E835010000                  call verificar_casillero
+   515 000005A3 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   516 000005AB 0F842D010000                je movimiento_valido
+   517                                  
+   518 000005B1 4889DF                      mov rdi, rbx
+   519 000005B4 48FFCF                      dec rdi
+   520 000005B7 E81C010000                  call verificar_casillero
+   521 000005BC 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   522 000005C4 0F8414010000                je movimiento_valido
+   523                                  
+   524 000005CA 4889DF                      mov rdi, rbx
+   525 000005CD 48FFC7                      inc rdi
+   526 000005D0 E803010000                  call verificar_casillero
+   527 000005D5 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   528 000005DD 0F84FB000000                je movimiento_valido
+   529                                  
+   530 000005E3 4889DF                      mov rdi, rbx
+   531 000005E6 4883EF06                    sub rdi, 6
+   532 000005EA E8E9000000                  call verificar_casillero
+   533 000005EF 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   534 000005F7 0F84E1000000                je movimiento_valido
+   535                                  
+   536 000005FD 4889DF                      mov rdi, rbx
+   537 00000600 4883EF08                    sub rdi, 8
+   538 00000604 E8CF000000                  call verificar_casillero
+   539 00000609 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   540 00000611 0F84C7000000                je movimiento_valido
+   541                                  
+   542 00000617 4889DF                      mov rdi, rbx
+   543 0000061A 4883C706                    add rdi, 6
+   544 0000061E E8B5000000                  call verificar_casillero
+   545 00000623 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   546 0000062B 0F84AD000000                je movimiento_valido
+   547                                  
+   548 00000631 4889DF                      mov rdi, rbx
+   549 00000634 4883C708                    add rdi, 8
+   550 00000638 E89B000000                  call verificar_casillero
+   551 0000063D 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   552 00000645 0F8493000000                je movimiento_valido
+   553                                  
+   554                                      ; Verificar las posiciones más alejadas (dos espacios en cada dirección)
+   555 0000064B 4889DF                      mov rdi, rbx
+   556 0000064E 4883EF0E                    sub rdi, 14  ; dos espacios hacia arriba-izquierda
+   557 00000652 E881000000                  call verificar_casillero
+   558 00000657 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   559 0000065F 747D                        je movimiento_valido
+   560                                  
+   561 00000661 4889DF                      mov rdi, rbx
+   562 00000664 4883EF0C                    sub rdi, 12  ; dos espacios hacia arriba-derecha
+   563 00000668 E86B000000                  call verificar_casillero
+   564 0000066D 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   565 00000675 7467                        je movimiento_valido
+   566                                  
+   567 00000677 4889DF                      mov rdi, rbx
+   568 0000067A 4883C70C                    add rdi, 12  ; dos espacios hacia abajo-izquierda
+   569 0000067E E855000000                  call verificar_casillero
+   570 00000683 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   571 0000068B 7451                        je movimiento_valido
+   572                                  
+   573 0000068D 4889DF                      mov rdi, rbx
+   574 00000690 4883C70E                    add rdi, 14  ; dos espacios hacia abajo-derecha
+   575 00000694 E83F000000                  call verificar_casillero
+   576 00000699 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   577 000006A1 743B                        je movimiento_valido
+   578                                  
+   579 000006A3 4889DF                      mov rdi, rbx
+   580 000006A6 4883EF0E                    sub rdi, 14  ; dos espacios hacia arriba
+   581 000006AA E829000000                  call verificar_casillero
+   582 000006AF 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   583 000006B7 7425                        je movimiento_valido
+   584                                  
+   585 000006B9 4889DF                      mov rdi, rbx
+   586 000006BC 4883C70E                    add rdi, 14  ; dos espacios hacia abajo
+   587 000006C0 E813000000                  call verificar_casillero
+   588 000006C5 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   589 000006CD 740F                        je movimiento_valido
+   590                                  
+   591                                      ; Si no hay movimientos válidos
+   592 000006CF C60425[6A010000]4E          mov byte [input_valido], 'N'
+   593 000006D7 C3                          ret
+   594                                  
+   595                                  verificar_casillero:
+   596 000006D8 803F02                      cmp byte [rdi], 2  ; Verificar si el casillero es vacío (2)
+   597 000006DB 7401                        je movimiento_valido
+   598 000006DD C3                          ret
+   599                                  
+   600                                  movimiento_valido:
+   601 000006DE C60425[6A010000]53          mov byte [input_valido], 'S'
+   602 000006E6 C3                          ret
+   603                                  
+   604                                  pedir_movimiento_oca:
+   605 000006E7 48BF-                       mov rdi, mensaje_mover_oca
+   605 000006E9 [3D00000000000000] 
+   606                                      mPuts
      4 000006F1 4883EC08            <1>  sub rsp,8
      5 000006F5 E8(00000000)        <1>  call puts
      6 000006FA 4883C408            <1>  add rsp,8
-   605 000006FE 48BF-                       mov rdi, input_oca
-   605 00000700 [5E01000000000000] 
-   606                                      mGets
+   607 000006FE 48BF-                       mov rdi, input_oca
+   607 00000700 [5E01000000000000] 
+   608                                      mGets
     10 00000708 4883EC08            <1>  sub rsp,8
     11 0000070C E8(00000000)        <1>  call gets
     12 00000711 4883C408            <1>  add rsp,8
-   607 00000715 803C25[5E010000]66          cmp byte [input_oca], 'f'    ; Verificar si se desea abandonar la partida
-   608 0000071D 0F8416020000                je guardar_partida
-   609                                      ; Validar las coordenadas de la oca
-   610 00000723 4883EC08                    sub rsp,8
-   611 00000727 E8F5000000                  call validar_coordenadas_oca
-   612 0000072C 4883C408                    add rsp,8
-   613 00000730 803C25[6A010000]53          cmp byte [input_valido], 'S'
-   614 00000738 7425                        je pedir_direccion_oca
-   615                                  
-   616 0000073A 48BF-                       mov rdi, mensaje_error_input
-   616 0000073C [0401000000000000] 
-   617                                      mPuts
+   609 00000715 803C25[5E010000]66          cmp byte [input_oca], 'f'    ; Verificar si se desea abandonar la partida
+   610 0000071D 0F8416020000                je guardar_partida
+   611                                      ; Validar las coordenadas de la oca
+   612 00000723 4883EC08                    sub rsp,8
+   613 00000727 E8F5000000                  call validar_coordenadas_oca
+   614 0000072C 4883C408                    add rsp,8
+   615 00000730 803C25[6A010000]53          cmp byte [input_valido], 'S'
+   616 00000738 7425                        je pedir_direccion_oca
+   617                                  
+   618 0000073A 48BF-                       mov rdi, mensaje_error_input
+   618 0000073C [0401000000000000] 
+   619                                      mPuts
      4 00000744 4883EC08            <1>  sub rsp,8
      5 00000748 E8(00000000)        <1>  call puts
      6 0000074D 4883C408            <1>  add rsp,8
-   618 00000751 4883EC08                    sub rsp,8
-   619 00000755 E88DFFFFFF                  call pedir_movimiento_oca
-   620 0000075A 4883C408                    add rsp,8
-   621 0000075E C3                          ret
-   622                                  
-   623                                  pedir_direccion_oca:
-   624 0000075F 48BF-                       mov rdi, mensaje_mover_oca_direccion
-   624 00000761 [9F00000000000000] 
-   625                                      mPuts
+   620 00000751 4883EC08                    sub rsp,8
+   621 00000755 E88DFFFFFF                  call pedir_movimiento_oca
+   622 0000075A 4883C408                    add rsp,8
+   623 0000075E C3                          ret
+   624                                  
+   625                                  pedir_direccion_oca:
+   626 0000075F 48BF-                       mov rdi, mensaje_mover_oca_direccion
+   626 00000761 [9F00000000000000] 
+   627                                      mPuts
      4 00000769 4883EC08            <1>  sub rsp,8
      5 0000076D E8(00000000)        <1>  call puts
      6 00000772 4883C408            <1>  add rsp,8
-   626 00000776 48BF-                       mov rdi, input_oca
-   626 00000778 [5E01000000000000] 
-   627                                      mGets
+   628 00000776 48BF-                       mov rdi, input_oca
+   628 00000778 [5E01000000000000] 
+   629                                      mGets
     10 00000780 4883EC08            <1>  sub rsp,8
     11 00000784 E8(00000000)        <1>  call gets
     12 00000789 4883C408            <1>  add rsp,8
-   628 0000078D C3                          ret
-   629                                  
-   630                                  mover_oca:
-   631 0000078E 48BE-                       mov rsi, tablero
-   631 00000790 [0000000000000000] 
-   632                                      ; Calcular la posición en el tablero
-   633 00000798 488B1C25[6B010000]          mov rbx, [posicion_oca]
-   634                                      ; Leer la dirección de movimiento
-   635 000007A0 48BF-                       mov rdi, input_oca
-   635 000007A2 [5E01000000000000] 
-   636 000007AA 8A07                        mov al, [rdi]
-   637 000007AC 3C73                        cmp al, 's'
-   638 000007AE 7425                        je mover_oca_abajo
-   639 000007B0 3C61                        cmp al, 'a'
-   640 000007B2 7427                        je mover_oca_izquierda
-   641 000007B4 3C64                        cmp al, 'd'
-   642 000007B6 7428                        je mover_oca_derecha
-   643 000007B8 48BF-                       mov rdi, mensaje_error_input
-   643 000007BA [0401000000000000] 
-   644                                      mPuts
+   630 0000078D C3                          ret
+   631                                  
+   632                                  mover_oca:
+   633 0000078E 48BE-                       mov rsi, tablero
+   633 00000790 [0000000000000000] 
+   634                                      ; Calcular la posición en el tablero
+   635 00000798 488B1C25[6B010000]          mov rbx, [posicion_oca]
+   636                                      ; Leer la dirección de movimiento
+   637 000007A0 48BF-                       mov rdi, input_oca
+   637 000007A2 [5E01000000000000] 
+   638 000007AA 8A07                        mov al, [rdi]
+   639 000007AC 3C73                        cmp al, 's'
+   640 000007AE 7425                        je mover_oca_abajo
+   641 000007B0 3C61                        cmp al, 'a'
+   642 000007B2 7427                        je mover_oca_izquierda
+   643 000007B4 3C64                        cmp al, 'd'
+   644 000007B6 7428                        je mover_oca_derecha
+   645 000007B8 48BF-                       mov rdi, mensaje_error_input
+   645 000007BA [0401000000000000] 
+   646                                      mPuts
      4 000007C2 4883EC08            <1>  sub rsp,8
      5 000007C6 E8(00000000)        <1>  call puts
      6 000007CB 4883C408            <1>  add rsp,8
-   645 000007CF E983F9FFFF                  jmp turno_ocas
-   646 000007D4 C3                          ret
-   647                                  
-   648                                  mover_oca_abajo:
-   649 000007D5 4883C307                    add rbx, 7
-   650 000007D9 EB0A                        jmp validar_movimiento_oca
-   651                                  
-   652                                  mover_oca_izquierda:
-   653 000007DB 48FFCB                      dec rbx
-   654 000007DE EB05                        jmp validar_movimiento_oca
-   655                                  
-   656                                  mover_oca_derecha:
-   657 000007E0 48FFC3                      inc rbx
-   658 000007E3 EB00                        jmp validar_movimiento_oca
-   659                                  
-   660                                  validar_movimiento_oca:
-   661 000007E5 803B02                      cmp byte [rbx], 2
-   662 000007E8 7517                        jne movimiento_invalido_oca
-   663 000007EA 488B3425[6B010000]          mov rsi, [posicion_oca]
-   664 000007F2 C60602                      mov byte [rsi], 2          ; Actualizar la posición anterior de la oca con 2 (vacío)
-   665 000007F5 C60301                      mov byte [rbx], 1          ; Colocar la oca en la nueva posición
-   666 000007F8 C60425[6A010000]53          mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
-   667 00000800 C3                          ret
-   668                                  
-   669                                  movimiento_invalido_oca:
-   670 00000801 C60425[6A010000]52          mov byte [input_valido], 'R'
-   671 00000809 48BF-                       mov rdi, mensaje_mov_invalido
-   671 0000080B [F301000000000000] 
-   672                                      mPuts
+   647 000007CF E983F9FFFF                  jmp turno_ocas
+   648 000007D4 C3                          ret
+   649                                  
+   650                                  mover_oca_abajo:
+   651 000007D5 4883C307                    add rbx, 7
+   652 000007D9 EB0A                        jmp validar_movimiento_oca
+   653                                  
+   654                                  mover_oca_izquierda:
+   655 000007DB 48FFCB                      dec rbx
+   656 000007DE EB05                        jmp validar_movimiento_oca
+   657                                  
+   658                                  mover_oca_derecha:
+   659 000007E0 48FFC3                      inc rbx
+   660 000007E3 EB00                        jmp validar_movimiento_oca
+   661                                  
+   662                                  validar_movimiento_oca:
+   663 000007E5 803B02                      cmp byte [rbx], 2
+   664 000007E8 7517                        jne movimiento_invalido_oca
+   665 000007EA 488B3425[6B010000]          mov rsi, [posicion_oca]
+   666 000007F2 C60602                      mov byte [rsi], 2          ; Actualizar la posición anterior de la oca con 2 (vacío)
+   667 000007F5 C60301                      mov byte [rbx], 1          ; Colocar la oca en la nueva posición
+   668 000007F8 C60425[6A010000]53          mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
+   669 00000800 C3                          ret
+   670                                  
+   671                                  movimiento_invalido_oca:
+   672 00000801 C60425[6A010000]52          mov byte [input_valido], 'R'
+   673 00000809 48BF-                       mov rdi, mensaje_mov_invalido
+   673 0000080B [F301000000000000] 
+   674                                      mPuts
      4 00000813 4883EC08            <1>  sub rsp,8
      5 00000817 E8(00000000)        <1>  call puts
      6 0000081C 4883C408            <1>  add rsp,8
-   673 00000820 C3                          ret
-   674                                  
-   675                                  validar_coordenadas_oca:
-   676 00000821 C60425[6A010000]4E          mov byte [input_valido], 'N'
-   677 00000829 48BF-                       mov rdi, input_oca
-   677 0000082B [5E01000000000000] 
-   678 00000833 48BE-                       mov rsi, formatInputFilCol
-   678 00000835 [FA00000000000000] 
-   679 0000083D 48BA-                       mov rdx, fila
-   679 0000083F [6801000000000000] 
-   680 00000847 48B9-                       mov rcx, columna
-   680 00000849 [6901000000000000] 
-   681 00000851 4883EC08                    sub rsp,8
-   682 00000855 E8(00000000)                call sscanf
-   683 0000085A 4883C408                    add rsp,8
-   684                                  
-   685 0000085E 4883F802                    cmp rax, 2
-   686 00000862 7C69                        jl coordenadas_invalidas
-   687                                  
-   688 00000864 803C25[68010000]01          cmp byte [fila], 1
-   689 0000086C 7C5F                        jl coordenadas_invalidas
-   690 0000086E 803C25[68010000]07          cmp byte [fila], 7
-   691 00000876 7F55                        jg coordenadas_invalidas
-   692                                  
-   693 00000878 803C25[69010000]01          cmp byte [columna], 1
-   694 00000880 7C4B                        jl coordenadas_invalidas
-   695 00000882 803C25[69010000]07          cmp byte [columna], 7
-   696 0000088A 7F41                        jg coordenadas_invalidas
-   697                                  
-   698                                      ; Calcular la posición en el tablero
-   699 0000088C 660FB60425-                 movzx ax, byte [fila]   ;cargo en ax la fila
-   699 00000891 [68010000]         
-   700 00000895 6683E801                    sub ax, 1               ;para indexar en 0 
-   701 00000899 666BC007                    imul ax, 7              ;desplazamiento en fila
-   702 0000089D 660FB61425-                 movzx dx, byte [columna]    ;cargo en dx la columna
-   702 000008A2 [69010000]         
-   703 000008A6 6683EA01                    sub dx, 1   
-   704 000008AA 6601D0                      add ax, dx              ;desplazamiento total
-   705 000008AD 4889C3                      mov rbx, rax    
-   706 000008B0 4881C3[00000000]            add rbx, tablero          ;posicion en el tablero
-   707                                  
-   708                                      ; Verificar si hay una oca en la posición ingresada
-   709 000008B7 803B01                      cmp byte [rbx], 1
-   710 000008BA 7511                        jne coordenadas_invalidas
-   711                                  
-   712 000008BC C60425[6A010000]53          mov byte [input_valido], 'S'
-   713 000008C4 48891C25[6B010000]          mov [posicion_oca], rbx    ; Guardar la posición de la oca
-   714 000008CC C3                          ret
-   715                                  
-   716                                  coordenadas_invalidas:
-   717 000008CD 48BF-                       mov rdi, mensaje_error_input
-   717 000008CF [0401000000000000] 
-   718                                      mPuts
+   675 00000820 C3                          ret
+   676                                  
+   677                                  validar_coordenadas_oca:
+   678 00000821 C60425[6A010000]4E          mov byte [input_valido], 'N'
+   679 00000829 48BF-                       mov rdi, input_oca
+   679 0000082B [5E01000000000000] 
+   680 00000833 48BE-                       mov rsi, formatInputFilCol
+   680 00000835 [FA00000000000000] 
+   681 0000083D 48BA-                       mov rdx, fila
+   681 0000083F [6801000000000000] 
+   682 00000847 48B9-                       mov rcx, columna
+   682 00000849 [6901000000000000] 
+   683 00000851 4883EC08                    sub rsp,8
+   684 00000855 E8(00000000)                call sscanf
+   685 0000085A 4883C408                    add rsp,8
+   686                                  
+   687 0000085E 4883F802                    cmp rax, 2
+   688 00000862 7C69                        jl coordenadas_invalidas
+   689                                  
+   690 00000864 803C25[68010000]01          cmp byte [fila], 1
+   691 0000086C 7C5F                        jl coordenadas_invalidas
+   692 0000086E 803C25[68010000]07          cmp byte [fila], 7
+   693 00000876 7F55                        jg coordenadas_invalidas
+   694                                  
+   695 00000878 803C25[69010000]01          cmp byte [columna], 1
+   696 00000880 7C4B                        jl coordenadas_invalidas
+   697 00000882 803C25[69010000]07          cmp byte [columna], 7
+   698 0000088A 7F41                        jg coordenadas_invalidas
+   699                                  
+   700                                      ; Calcular la posición en el tablero
+   701 0000088C 660FB60425-                 movzx ax, byte [fila]   ;cargo en ax la fila
+   701 00000891 [68010000]         
+   702 00000895 6683E801                    sub ax, 1               ;para indexar en 0 
+   703 00000899 666BC007                    imul ax, 7              ;desplazamiento en fila
+   704 0000089D 660FB61425-                 movzx dx, byte [columna]    ;cargo en dx la columna
+   704 000008A2 [69010000]         
+   705 000008A6 6683EA01                    sub dx, 1   
+   706 000008AA 6601D0                      add ax, dx              ;desplazamiento total
+   707 000008AD 4889C3                      mov rbx, rax    
+   708 000008B0 4881C3[00000000]            add rbx, tablero          ;posicion en el tablero
+   709                                  
+   710                                      ; Verificar si hay una oca en la posición ingresada
+   711 000008B7 803B01                      cmp byte [rbx], 1
+   712 000008BA 7511                        jne coordenadas_invalidas
+   713                                  
+   714 000008BC C60425[6A010000]53          mov byte [input_valido], 'S'
+   715 000008C4 48891C25[6B010000]          mov [posicion_oca], rbx    ; Guardar la posición de la oca
+   716 000008CC C3                          ret
+   717                                  
+   718                                  coordenadas_invalidas:
+   719 000008CD 48BF-                       mov rdi, mensaje_error_input
+   719 000008CF [0401000000000000] 
+   720                                      mPuts
      4 000008D7 4883EC08            <1>  sub rsp,8
      5 000008DB E8(00000000)        <1>  call puts
      6 000008E0 4883C408            <1>  add rsp,8
-   719 000008E4 C3                          ret
-   720                                  
-   721                                  errorApertura:
-   722 000008E5 48BF-                       mov   rdi, msgErrorAp
-   722 000008E7 [4E04000000000000] 
-   723                                      mPuts
+   721 000008E4 C3                          ret
+   722                                  
+   723                                  errorApertura:
+   724 000008E5 48BF-                       mov   rdi, msgErrorAp
+   724 000008E7 [4E04000000000000] 
+   725                                      mPuts
      4 000008EF 4883EC08            <1>  sub rsp,8
      5 000008F3 E8(00000000)        <1>  call puts
      6 000008F8 4883C408            <1>  add rsp,8
-   724 000008FC E934010000                  jmp   fin_juego
-   725                                  
-   726                                  errorLeyendoArchivo:
-   727 00000901 48BF-                       mov   rdi, msgErrorLectura
-   727 00000903 [7904000000000000] 
-   728                                      mPuts
+   726 000008FC E934010000                  jmp   fin_juego
+   727                                  
+   728                                  errorLeyendoArchivo:
+   729 00000901 48BF-                       mov   rdi, msgErrorLectura
+   729 00000903 [7904000000000000] 
+   730                                      mPuts
      4 0000090B 4883EC08            <1>  sub rsp,8
      5 0000090F E8(00000000)        <1>  call puts
      6 00000914 4883C408            <1>  add rsp,8
-   729 00000918 E996F7FFFF                  jmp   continuar_jugando
-   730                                  
-   731                                  errorEscritura:
-   732 0000091D 48BF-                       mov   rdi, msgErrorEscritura
-   732 0000091F [EA04000000000000] 
-   733                                      mPuts
+   731 00000918 E996F7FFFF                  jmp   continuar_jugando
+   732                                  
+   733                                  errorEscritura:
+   734 0000091D 48BF-                       mov   rdi, msgErrorEscritura
+   734 0000091F [EA04000000000000] 
+   735                                      mPuts
      4 00000927 4883EC08            <1>  sub rsp,8
      5 0000092B E8(00000000)        <1>  call puts
      6 00000930 4883C408            <1>  add rsp,8
-   734 00000934 E9FC000000                  jmp   fin_juego
-   735                                  
-   736                                  guardar_partida:
-   737 00000939 48BF-                       mov     rdi, archivoTablero
-   737 0000093B [2D04000000000000] 
-   738 00000943 E84B010000                  call    abrirEscrituraArchivoTablero
-   739                                      
-   740 00000948 48BF-                       mov     rdi, msgGuardarPartida
-   740 0000094A [4A05000000000000] 
-   741                                      mPuts
+   736 00000934 E9FC000000                  jmp   fin_juego
+   737                                  
+   738                                  guardar_partida:
+   739 00000939 48BF-                       mov     rdi, archivoTablero
+   739 0000093B [2D04000000000000] 
+   740 00000943 E84B010000                  call    abrirEscrituraArchivoTablero
+   741                                      
+   742 00000948 48BF-                       mov     rdi, msgGuardarPartida
+   742 0000094A [4A05000000000000] 
+   743                                      mPuts
      4 00000952 4883EC08            <1>  sub rsp,8
      5 00000956 E8(00000000)        <1>  call puts
      6 0000095B 4883C408            <1>  add rsp,8
-   742 0000095F 48BF-                       mov     rdi, respuestaPartidaGuardada
-   742 00000961 [F701000000000000] 
-   743                                      mGets
+   744 0000095F 48BF-                       mov     rdi, respuestaPartidaGuardada
+   744 00000961 [F701000000000000] 
+   745                                      mGets
     10 00000969 4883EC08            <1>  sub rsp,8
     11 0000096D E8(00000000)        <1>  call gets
     12 00000972 4883C408            <1>  add rsp,8
-   744 00000976 B902000000                  mov     rcx, 2
-   745 0000097B 488D3425[89050000]          lea     rsi, [respuestaSi]
-   746 00000983 488D3C25[F7010000]          lea     rdi, [respuestaPartidaGuardada]
-   747 0000098B F3A6                        repe    cmpsb
-   748 0000098D 0F8589000000                jne     noGuardarPartida
-   749                                  
-   750 00000993 E861020000                  call    convertirTableroAStr
-   751 00000998 E85F010000                  call    escribirArchivoTablero
-   752 0000099D 4883F800                    cmp     rax, 0
-   753 000009A1 0F8E76FFFFFF                jle     errorEscritura
-   754 000009A7 E880010000                  call    cerrarArchivoTablero
-   755                                  
-   756 000009AC 48BF-                       mov     rdi, archivoEstadisticas
-   756 000009AE [3D04000000000000] 
-   757 000009B6 E8F0000000                  call    abrirEscrituraArchivoEstadisticas
-   758 000009BB E88B030000                  call    convertirEstadisticasAStr
-   759 000009C0 E84F010000                  call    escribirArchivoEstadisticas
-   760 000009C5 4883F800                    cmp     rax, 0
-   761 000009C9 0F8E4EFFFFFF                jle     errorEscritura
-   762 000009CF E866010000                  call    cerrarArchivoEstadisticas
-   763 000009D4 EB5F                        jmp     fin_juego
-   764                                  ganador_zorro:
-   765                                      ; Imprimir el mensaje del ganador y finalizar el juego
-   766 000009D6 48BF-                       mov rdi, mensaje_ganador
-   766 000009D8 [F202000000000000] 
-   767 000009E0 48BE-                       mov rsi, nombre_jugador1
-   767 000009E2 [7D01000000000000] 
-   768                                      mPrintF
+   746 00000976 B902000000                  mov     rcx, 2
+   747 0000097B 488D3425[89050000]          lea     rsi, [respuestaSi]
+   748 00000983 488D3C25[F7010000]          lea     rdi, [respuestaPartidaGuardada]
+   749 0000098B F3A6                        repe    cmpsb
+   750 0000098D 0F8589000000                jne     noGuardarPartida
+   751                                  
+   752 00000993 E861020000                  call    convertirTableroAStr
+   753 00000998 E85F010000                  call    escribirArchivoTablero
+   754 0000099D 4883F800                    cmp     rax, 0
+   755 000009A1 0F8E76FFFFFF                jle     errorEscritura
+   756 000009A7 E880010000                  call    cerrarArchivoTablero
+   757                                  
+   758 000009AC 48BF-                       mov     rdi, archivoEstadisticas
+   758 000009AE [3D04000000000000] 
+   759 000009B6 E8F0000000                  call    abrirEscrituraArchivoEstadisticas
+   760 000009BB E88B030000                  call    convertirEstadisticasAStr
+   761                                      
+   762 000009C0 E84F010000                  call    escribirArchivoEstadisticas
+   763                                      
+   764 000009C5 4883F800                    cmp     rax, 0
+   765 000009C9 0F8E4EFFFFFF                jle     errorEscritura
+   766 000009CF E866010000                  call    cerrarArchivoEstadisticas
+   767 000009D4 EB5F                        jmp     fin_juego
+   768                                  ganador_zorro:
+   769                                      ; Imprimir el mensaje del ganador y finalizar el juego
+   770 000009D6 48BF-                       mov rdi, mensaje_ganador
+   770 000009D8 [F202000000000000] 
+   771 000009E0 48BE-                       mov rsi, nombre_jugador1
+   771 000009E2 [7D01000000000000] 
+   772                                      mPrintF
     16 000009EA 4883EC08            <1>  sub rsp,8
     17 000009EE E8(00000000)        <1>  call printf
     18 000009F3 4883C408            <1>  add rsp,8
-   769 000009F7 EB3C                        jmp fin_juego
-   770                                  
-   771                                  ganador_ocas:
-   772                                      ; Imprimir el mensaje del ganador (ocas) y finalizar el juego
-   773 000009F9 48BF-                       mov rdi, mensaje_ganador
-   773 000009FB [F202000000000000] 
-   774 00000A03 48BE-                       mov rsi, nombre_jugador2
-   774 00000A05 [AF01000000000000] 
-   775                                      mPrintF
+   773 000009F7 EB3C                        jmp fin_juego
+   774                                  
+   775                                  ganador_ocas:
+   776                                      ; Imprimir el mensaje del ganador (ocas) y finalizar el juego
+   777 000009F9 48BF-                       mov rdi, mensaje_ganador
+   777 000009FB [F202000000000000] 
+   778 00000A03 48BE-                       mov rsi, nombre_jugador2
+   778 00000A05 [AF01000000000000] 
+   779                                      mPrintF
     16 00000A0D 4883EC08            <1>  sub rsp,8
     17 00000A11 E8(00000000)        <1>  call printf
     18 00000A16 4883C408            <1>  add rsp,8
-   776 00000A1A EB19                        jmp fin_juego
-   777                                  
-   778                                  noGuardarPartida:
-   779 00000A1C E80B010000                  call    cerrarArchivoTablero
-   780                                      ;Hago esto para que el contenido del archivo se elimine por completo
-   781 00000A21 48BF-                       mov     rdi, archivoEstadisticas
-   781 00000A23 [3D04000000000000] 
-   782 00000A2B E87B000000                  call    abrirEscrituraArchivoEstadisticas
-   783 00000A30 E805010000                  call    cerrarArchivoEstadisticas
-   784                                  fin_juego:
-   785 00000A35 4883EC08                    sub     rsp, 8
-   786 00000A39 E865040000                  call    mostrar_estadisticas
-   787 00000A3E 4883C408                    add     rsp, 8
-   788 00000A42 48BF-                       mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
-   788 00000A44 [0503000000000000] 
-   789                                      mPuts
+   780 00000A1A EB19                        jmp fin_juego
+   781                                  
+   782                                  noGuardarPartida:
+   783 00000A1C E80B010000                  call    cerrarArchivoTablero
+   784                                      ;Hago esto para que el contenido del archivo se elimine por completo
+   785 00000A21 48BF-                       mov     rdi, archivoEstadisticas
+   785 00000A23 [3D04000000000000] 
+   786 00000A2B E87B000000                  call    abrirEscrituraArchivoEstadisticas
+   787 00000A30 E805010000                  call    cerrarArchivoEstadisticas
+   788                                  fin_juego:
+   789 00000A35 4883EC08                    sub     rsp, 8
+   790 00000A39 E85D040000                  call    mostrar_estadisticas
+   791 00000A3E 4883C408                    add     rsp, 8
+   792 00000A42 48BF-                       mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
+   792 00000A44 [0503000000000000] 
+   793                                      mPuts
      4 00000A4C 4883EC08            <1>  sub rsp,8
      5 00000A50 E8(00000000)        <1>  call puts
      6 00000A55 4883C408            <1>  add rsp,8
-   790 00000A59 B83C000000                  mov     eax, 60                 ; syscall: exit
-   791 00000A5E 31FF                        xor     edi, edi                ; status: 0
-   792 00000A60 0F05                        syscall
-   793 00000A62 C3                      ret
-   794                                  
-   795                                  
-   796                                  
-   797                                  ;---------  RUTINAS INTERNAS -----------
-   798                                  abrirLecturaArchivoTablero:
-   799                                    
-   800 00000A63 48BE-                       mov   rsi, modoAperturaRead
-   800 00000A65 [3904000000000000] 
-   801 00000A6D E8(00000000)                call  fopen
-   802                                  
-   803 00000A72 48890425[E3010000]          mov   qword[handleArchTablero],rax
-   804 00000A7A C3                      ret
-   805                                  
-   806                                  abrirLecturaArchivoEstadisticas:
-   807                                    
-   808 00000A7B 48BE-                       mov   rsi, modoAperturaRead
-   808 00000A7D [3904000000000000] 
-   809 00000A85 E8(00000000)                call  fopen
-   810                                  
-   811 00000A8A 48890425[EB010000]          mov   qword[handleArchEstadisticas],rax
-   812 00000A92 C3                      ret
-   813                                  
-   814                                  abrirEscrituraArchivoTablero:
-   815                                    
-   816 00000A93 48BE-                       mov   rsi, modoAperturaWrite
-   816 00000A95 [3B04000000000000] 
-   817 00000A9D E8(00000000)                call  fopen
-   818                                  
-   819 00000AA2 48890425[E3010000]          mov   qword[handleArchTablero],rax
-   820 00000AAA C3                      ret
-   821                                  
+   794 00000A59 B83C000000                  mov     eax, 60                 ; syscall: exit
+   795 00000A5E 31FF                        xor     edi, edi                ; status: 0
+   796 00000A60 0F05                        syscall
+   797 00000A62 C3                      ret
+   798                                  
+   799                                  
+   800                                  
+   801                                  ;---------  RUTINAS INTERNAS -----------
+   802                                  abrirLecturaArchivoTablero:
+   803                                    
+   804 00000A63 48BE-                       mov   rsi, modoAperturaRead
+   804 00000A65 [3904000000000000] 
+   805 00000A6D E8(00000000)                call  fopen
+   806                                  
+   807 00000A72 48890425[E3010000]          mov   qword[handleArchTablero],rax
+   808 00000A7A C3                      ret
+   809                                  
+   810                                  abrirLecturaArchivoEstadisticas:
+   811                                    
+   812 00000A7B 48BE-                       mov   rsi, modoAperturaRead
+   812 00000A7D [3904000000000000] 
+   813 00000A85 E8(00000000)                call  fopen
+   814                                  
+   815 00000A8A 48890425[EB010000]          mov   qword[handleArchEstadisticas],rax
+   816 00000A92 C3                      ret
+   817                                  
+   818                                  abrirEscrituraArchivoTablero:
+   819                                    
+   820 00000A93 48BE-                       mov   rsi, modoAperturaWrite
+   820 00000A95 [3B04000000000000] 
+   821 00000A9D E8(00000000)                call  fopen
    822                                  
-   823                                  abrirEscrituraArchivoEstadisticas:
-   824                                    
-   825 00000AAB 48BE-                       mov   rsi, modoAperturaWrite
-   825 00000AAD [3B04000000000000] 
-   826 00000AB5 E8(00000000)                call  fopen
-   827                                  
-   828 00000ABA 48890425[EB010000]          mov   qword[handleArchEstadisticas],rax
-   829 00000AC2 C3                      ret
-   830                                  
-   831                                  leerArchivoTablero:
-   832                                  
-   833 00000AC3 48BF-                       mov   rdi, registro
-   833 00000AC5 [8C05000000000000] 
-   834 00000ACD BE33000000                  mov   rsi, 51
-   835 00000AD2 488B1425[E3010000]          mov   rdx, [handleArchTablero]
-   836 00000ADA E8(00000000)                call  fgets
-   837                                  
-   838 00000ADF C3                      ret
-   839                                  
-   840                                  leerArchivoEstadisticas:
-   841 00000AE0 48BF-                       mov     rdi, estadisticas
-   841 00000AE2 [F205000000000000] 
-   842 00000AEA BE0B000000                  mov     rsi, 11
-   843 00000AEF 488B1425[EB010000]          mov     rdx, [handleArchEstadisticas]
-   844 00000AF7 E8(00000000)                call    fgets
-   845                                  
-   846                                  escribirArchivoTablero:
-   847                                  
-   848 00000AFC 48BF-                       mov   rdi, tableroStr
-   848 00000AFE [BF05000000000000] 
-   849 00000B06 488B3425[E3010000]          mov   rsi, [handleArchTablero]
-   850 00000B0E E8(00000000)                call  fputs
-   851 00000B13 C3                      ret
-   852                                  
-   853                                  escribirArchivoEstadisticas:
-   854 00000B14 48BF-                       mov   rdi, estadisticas
-   854 00000B16 [F205000000000000] 
-   855 00000B1E 488B3425[EB010000]          mov   rsi, [handleArchEstadisticas]
-   856 00000B26 E8(00000000)                call  fputs
-   857 00000B2B C3                      ret
-   858                                  
-   859                                  cerrarArchivoTablero:
-   860                                  
-   861 00000B2C 488B3C25[E3010000]          mov   rdi, [handleArchTablero]
-   862 00000B34 E8(00000000)                call  fclose
-   863 00000B39 C3                      ret
+   823 00000AA2 48890425[E3010000]          mov   qword[handleArchTablero],rax
+   824 00000AAA C3                      ret
+   825                                  
+   826                                  
+   827                                  abrirEscrituraArchivoEstadisticas:
+   828                                    
+   829 00000AAB 48BE-                       mov   rsi, modoAperturaWrite
+   829 00000AAD [3B04000000000000] 
+   830 00000AB5 E8(00000000)                call  fopen
+   831                                  
+   832 00000ABA 48890425[EB010000]          mov   qword[handleArchEstadisticas],rax
+   833 00000AC2 C3                      ret
+   834                                  
+   835                                  leerArchivoTablero:
+   836                                  
+   837 00000AC3 48BF-                       mov   rdi, registro
+   837 00000AC5 [8C05000000000000] 
+   838 00000ACD BE33000000                  mov   rsi, 51
+   839 00000AD2 488B1425[E3010000]          mov   rdx, [handleArchTablero]
+   840 00000ADA E8(00000000)                call  fgets
+   841                                  
+   842 00000ADF C3                      ret
+   843                                  
+   844                                  leerArchivoEstadisticas:
+   845 00000AE0 48BF-                       mov     rdi, estadisticas
+   845 00000AE2 [3206000000000000] 
+   846 00000AEA BE0B000000                  mov     rsi, 11
+   847 00000AEF 488B1425[EB010000]          mov     rdx, [handleArchEstadisticas]
+   848 00000AF7 E8(00000000)                call    fgets
+   849                                  
+   850                                  escribirArchivoTablero:
+   851                                  
+   852 00000AFC 48BF-                       mov   rdi, tableroStr
+   852 00000AFE [BF05000000000000] 
+   853 00000B06 488B3425[E3010000]          mov   rsi, [handleArchTablero]
+   854 00000B0E E8(00000000)                call  fputs
+   855 00000B13 C3                      ret
+   856                                  
+   857                                  escribirArchivoEstadisticas:
+   858 00000B14 48BF-                       mov   rdi, estadisticas
+   858 00000B16 [3206000000000000] 
+   859 00000B1E 488B3425[EB010000]          mov   rsi, [handleArchEstadisticas]
+   860 00000B26 E8(00000000)                call  fputs
+   861 00000B2B C3                      ret
+   862                                  
+   863                                  cerrarArchivoTablero:
    864                                  
-   865                                  cerrarArchivoEstadisticas:
-   866                                  
-   867 00000B3A 488B3C25[EB010000]          mov   rdi, [handleArchEstadisticas]
-   868 00000B42 E8(00000000)                call  fclose
-   869 00000B47 C3                      ret
+   865 00000B2C 488B3C25[E3010000]          mov   rdi, [handleArchTablero]
+   866 00000B34 E8(00000000)                call  fclose
+   867 00000B39 C3                      ret
+   868                                  
+   869                                  cerrarArchivoEstadisticas:
    870                                  
-   871                                  ;---------------------------------
-   872                                  copiarRegistroATablero:
-   873                                  
-   874 00000B48 C60425[F4010000]00          mov   byte[posicionVect], 0
-   875 00000B50 C60425[F5010000]01          mov   byte[posicionMatFil], 1
-   876 00000B58 C60425[F6010000]01          mov   byte[posicionMatCol], 1
+   871 00000B3A 488B3C25[EB010000]          mov   rdi, [handleArchEstadisticas]
+   872 00000B42 E8(00000000)                call  fclose
+   873 00000B47 C3                      ret
+   874                                  
+   875                                  ;---------------------------------
+   876                                  copiarRegistroATablero:
    877                                  
-   878                                  recorroReg:
-   879                                  
-   880 00000B60 803C25[F4010000]31          cmp   byte[posicionVect], 49
-   881 00000B68 0F8D8A000000                jge    finalizoCopia
-   882                                  
-   883 00000B6E 8A0425[F4010000]            mov   al, byte[posicionVect]
-   884 00000B75 6698                        cbw
-   885 00000B77 98                          cwde
-   886 00000B78 4898                        cdqe
-   887 00000B7A 8A88[8C050000]              mov   cl,[registro+rax]
-   888 00000B80 80E930                      sub   cl, '0'
-   889 00000B83 880C25[F3010000]            mov   [numero], cl
-   890                                  
-   891                                      ; Agrego el nro a la matriz
-   892                                      
-   893 00000B8A 8A0425[F5010000]            mov   al, byte[posicionMatFil] 
-   894 00000B91 6698                        cbw
-   895 00000B93 98                          cwde
-   896 00000B94 4898                        cdqe
-   897 00000B96 48FFC8                      dec   rax
-   898 00000B99 486BC007                    imul  rax, CANT_FIL_COL
-   899                                  
-   900 00000B9D 4889C1                      mov   rcx, rax
-   901                                  
-   902 00000BA0 8A0425[F6010000]            mov   al, byte[posicionMatCol]
-   903 00000BA7 6698                        cbw
-   904 00000BA9 98                          cwde
-   905 00000BAA 4898                        cdqe
-   906 00000BAC 48FFC8                      dec   rax
-   907                                      
-   908 00000BAF 4801C1                      add   rcx, rax      ; Desplazamiento en matriz
-   909                                  
-   910 00000BB2 8A0425[F3010000]            mov   al, byte[numero]
-   911 00000BB9 8881[00000000]              mov   [tablero+rcx], al
-   912                                  
-   913                                  avanzarColumna:
-   914 00000BBF FE0425[F6010000]            inc   byte[posicionMatCol]
-   915 00000BC6 803C25[F6010000]07          cmp   byte[posicionMatCol], CANT_FIL_COL
-   916 00000BCE 7F02                        jg    avanzarFila
-   917 00000BD0 EB19                        jmp   sigoEnVector
-   918                                  
-   919                                  avanzarFila:
-   920 00000BD2 C60425[F6010000]01          mov   byte[posicionMatCol], 1
-   921 00000BDA FE0425[F5010000]            inc   byte[posicionMatFil]
-   922 00000BE1 803C25[F5010000]07          cmp   byte[posicionMatFil], CANT_FIL_COL
-   923 00000BE9 7F0D                        jg    finalizoCopia
-   924                                  
-   925                                  sigoEnVector:
-   926 00000BEB 800425[F4010000]01          add   byte[posicionVect], 1
-   927 00000BF3 E968FFFFFF                  jmp   recorroReg
+   878 00000B48 C60425[F4010000]00          mov   byte[posicionVect], 0
+   879 00000B50 C60425[F5010000]01          mov   byte[posicionMatFil], 1
+   880 00000B58 C60425[F6010000]01          mov   byte[posicionMatCol], 1
+   881                                  
+   882                                  recorroReg:
+   883                                  
+   884 00000B60 803C25[F4010000]31          cmp   byte[posicionVect], 49
+   885 00000B68 0F8D8A000000                jge    finalizoCopia
+   886                                  
+   887 00000B6E 8A0425[F4010000]            mov   al, byte[posicionVect]
+   888 00000B75 6698                        cbw
+   889 00000B77 98                          cwde
+   890 00000B78 4898                        cdqe
+   891 00000B7A 8A88[8C050000]              mov   cl,[registro+rax]
+   892 00000B80 80E930                      sub   cl, '0'
+   893 00000B83 880C25[F3010000]            mov   [numero], cl
+   894                                  
+   895                                      ; Agrego el nro a la matriz
+   896                                      
+   897 00000B8A 8A0425[F5010000]            mov   al, byte[posicionMatFil] 
+   898 00000B91 6698                        cbw
+   899 00000B93 98                          cwde
+   900 00000B94 4898                        cdqe
+   901 00000B96 48FFC8                      dec   rax
+   902 00000B99 486BC007                    imul  rax, CANT_FIL_COL
+   903                                  
+   904 00000B9D 4889C1                      mov   rcx, rax
+   905                                  
+   906 00000BA0 8A0425[F6010000]            mov   al, byte[posicionMatCol]
+   907 00000BA7 6698                        cbw
+   908 00000BA9 98                          cwde
+   909 00000BAA 4898                        cdqe
+   910 00000BAC 48FFC8                      dec   rax
+   911                                      
+   912 00000BAF 4801C1                      add   rcx, rax      ; Desplazamiento en matriz
+   913                                  
+   914 00000BB2 8A0425[F3010000]            mov   al, byte[numero]
+   915 00000BB9 8881[00000000]              mov   [tablero+rcx], al
+   916                                  
+   917                                  avanzarColumna:
+   918 00000BBF FE0425[F6010000]            inc   byte[posicionMatCol]
+   919 00000BC6 803C25[F6010000]07          cmp   byte[posicionMatCol], CANT_FIL_COL
+   920 00000BCE 7F02                        jg    avanzarFila
+   921 00000BD0 EB19                        jmp   sigoEnVector
+   922                                  
+   923                                  avanzarFila:
+   924 00000BD2 C60425[F6010000]01          mov   byte[posicionMatCol], 1
+   925 00000BDA FE0425[F5010000]            inc   byte[posicionMatFil]
+   926 00000BE1 803C25[F5010000]07          cmp   byte[posicionMatFil], CANT_FIL_COL
+   927 00000BE9 7F0D                        jg    finalizoCopia
    928                                  
-   929                                  finalizoCopia:
-   930 00000BF8 C3                      ret
-   931                                  
+   929                                  sigoEnVector:
+   930 00000BEB 800425[F4010000]01          add   byte[posicionVect], 1
+   931 00000BF3 E968FFFFFF                  jmp   recorroReg
    932                                  
-   933                                  
-   934                                  convertirTableroAStr:
-   935 00000BF9 C60425[F5010000]01          mov   byte[posicionMatFil], 1
-   936 00000C01 C60425[F6010000]01          mov   byte[posicionMatCol], 1
+   933                                  finalizoCopia:
+   934 00000BF8 C3                      ret
+   935                                  
+   936                                  
    937                                  
-   938                                  continuoCopiaStr:
-   939 00000C09 8A0425[F5010000]            mov   al, byte[posicionMatFil] 
-   940 00000C10 6698                        cbw
-   941 00000C12 98                          cwde
-   942 00000C13 4898                        cdqe
-   943 00000C15 48FFC8                      dec   rax
-   944 00000C18 486BC007                    imul  rax, CANT_FIL_COL
-   945                                  
-   946 00000C1C 4889C1                      mov   rcx, rax
-   947                                  
-   948 00000C1F 8A0425[F6010000]            mov   al, byte[posicionMatCol]
-   949 00000C26 6698                        cbw
-   950 00000C28 98                          cwde
-   951 00000C29 4898                        cdqe
-   952 00000C2B 48FFC8                      dec   rax
-   953                                      
-   954 00000C2E 4801C1                      add   rcx, rax      ; Desplazamiento en matriz
-   955 00000C31 4883F930                    cmp   rcx, DESPLAZ_LIMITE
-   956 00000C35 7F42                        jg    finalizoCopiaStr
-   957                                  
-   958 00000C37 8A81[00000000]              mov   al, [tablero+rcx]
-   959 00000C3D 0430                        add   al, 48
-   960 00000C3F 6698                        cbw
-   961 00000C41 98                          cwde
-   962 00000C42 4898                        cdqe
-   963 00000C44 488981[BF050000]            mov   [tableroStr+rcx], rax
-   964                                  
-   965                                  avanzarColumnaStr:
-   966 00000C4B FE0425[F6010000]            inc   byte[posicionMatCol]
-   967 00000C52 803C25[F6010000]07          cmp   byte[posicionMatCol], CANT_FIL_COL
-   968 00000C5A 7F02                        jg    avanzarFilaStr
-   969 00000C5C EBAB                        jmp   continuoCopiaStr
-   970                                  
-   971                                  avanzarFilaStr:
-   972 00000C5E C60425[F6010000]01          mov   byte[posicionMatCol], 1
-   973 00000C66 FE0425[F5010000]            inc   byte[posicionMatFil]
-   974 00000C6D 803C25[F5010000]07          cmp   byte[posicionMatFil], CANT_FIL_COL
-   975 00000C75 7F02                        jg    finalizoCopiaStr
-   976 00000C77 EB90                        jmp   continuoCopiaStr
-   977                                      
-   978                                  finalizoCopiaStr:
-   979 00000C79 C60425[F0050000]0A          mov   byte[tableroStr+49], 10 ;Agrego un salto de línea al final del archivo
-   980 00000C81 C3                      ret
-   981                                  
-   982                                  
-   983                                  
-   984                                  cargarEstadisticas:
-   985 00000C82 488B0C25[F2050000]          mov     rcx, [turnoGuardado]
-   986 00000C8A 4883E930                    sub     rcx, 48
-   987 00000C8E 48890C25[E1010000]          mov     [turno], rcx
-   988                                  
-   989 00000C96 488B0C25[F3050000]          mov     rcx, [cantOcasEliminadas]
-   990 00000C9E 4883E930                    sub     rcx, 48
-   991 00000CA2 48890C25[38030000]          mov     [cantidad_ocas_eliminadas], rcx
+   938                                  convertirTableroAStr:
+   939 00000BF9 C60425[F5010000]01          mov   byte[posicionMatFil], 1
+   940 00000C01 C60425[F6010000]01          mov   byte[posicionMatCol], 1
+   941                                  
+   942                                  continuoCopiaStr:
+   943 00000C09 8A0425[F5010000]            mov   al, byte[posicionMatFil] 
+   944 00000C10 6698                        cbw
+   945 00000C12 98                          cwde
+   946 00000C13 4898                        cdqe
+   947 00000C15 48FFC8                      dec   rax
+   948 00000C18 486BC007                    imul  rax, CANT_FIL_COL
+   949                                  
+   950 00000C1C 4889C1                      mov   rcx, rax
+   951                                  
+   952 00000C1F 8A0425[F6010000]            mov   al, byte[posicionMatCol]
+   953 00000C26 6698                        cbw
+   954 00000C28 98                          cwde
+   955 00000C29 4898                        cdqe
+   956 00000C2B 48FFC8                      dec   rax
+   957                                      
+   958 00000C2E 4801C1                      add   rcx, rax      ; Desplazamiento en matriz
+   959 00000C31 4883F930                    cmp   rcx, DESPLAZ_LIMITE
+   960 00000C35 7F42                        jg    finalizoCopiaStr
+   961                                  
+   962 00000C37 8A81[00000000]              mov   al, [tablero+rcx]
+   963 00000C3D 0430                        add   al, 48
+   964 00000C3F 6698                        cbw
+   965 00000C41 98                          cwde
+   966 00000C42 4898                        cdqe
+   967 00000C44 488981[BF050000]            mov   [tableroStr+rcx], rax
+   968                                  
+   969                                  avanzarColumnaStr:
+   970 00000C4B FE0425[F6010000]            inc   byte[posicionMatCol]
+   971 00000C52 803C25[F6010000]07          cmp   byte[posicionMatCol], CANT_FIL_COL
+   972 00000C5A 7F02                        jg    avanzarFilaStr
+   973 00000C5C EBAB                        jmp   continuoCopiaStr
+   974                                  
+   975                                  avanzarFilaStr:
+   976 00000C5E C60425[F6010000]01          mov   byte[posicionMatCol], 1
+   977 00000C66 FE0425[F5010000]            inc   byte[posicionMatFil]
+   978 00000C6D 803C25[F5010000]07          cmp   byte[posicionMatFil], CANT_FIL_COL
+   979 00000C75 7F02                        jg    finalizoCopiaStr
+   980 00000C77 EB90                        jmp   continuoCopiaStr
+   981                                      
+   982                                  finalizoCopiaStr:
+   983 00000C79 C60425[F0050000]0A          mov   byte[tableroStr+49], 10 ;Agrego un salto de línea al final del archivo
+   984 00000C81 C3                      ret
+   985                                  
+   986                                  
+   987                                  
+   988                                  cargarEstadisticas:
+   989 00000C82 488B0C25[32060000]          mov     rcx, [turnoGuardado]
+   990 00000C8A 4883E930                    sub     rcx, 48
+   991 00000C8E 48890C25[E1010000]          mov     [turno], rcx
    992                                  
-   993 00000CAA 488B0C25[F4050000]          mov     rcx, [estats_mov_abajo_guardado]
-   994 00000CB2 4883E930                    sub     rcx, 48
-   995 00000CB6 48890C25[FC050000]          mov     [estats_mov_abajo], rcx
+   993 00000C96 488B0C25[33060000]          mov     rcx, [cantOcasEliminadas]
+   994 00000C9E 4883E930                    sub     rcx, 48
+   995 00000CA2 48890C25[38030000]          mov     [cantidad_ocas_eliminadas], rcx
    996                                  
-   997 00000CBE 488B0C25[F9050000]          mov     rcx, [estats_mov_abajo_izq_guardado]
-   998 00000CC6 4883E930                    sub     rcx, 48
-   999 00000CCA 48890C25[24060000]          mov     [estats_mov_abajo_izq], rcx
+   997 00000CAA 488B0C25[34060000]          mov     rcx, [estats_mov_abajo_guardado]
+   998 00000CB2 4883E930                    sub     rcx, 48
+   999 00000CB6 48890C25[F2050000]          mov     [estats_mov_abajo], rcx
   1000                                  
-  1001 00000CD2 488B0C25[F8050000]          mov     rcx, [estats_mov_abajo_der_guardado]
-  1002 00000CDA 4883E930                    sub     rcx, 48
-  1003 00000CDE 48890C25[1C060000]          mov     [estats_mov_abajo_der], rcx
+  1001 00000CBE 488B0C25[39060000]          mov     rcx, [estats_mov_abajo_izq_guardado]
+  1002 00000CC6 4883E930                    sub     rcx, 48
+  1003 00000CCA 48890C25[1A060000]          mov     [estats_mov_abajo_izq], rcx
   1004                                  
-  1005 00000CE6 488B0C25[F5050000]          mov     rcx, [estats_mov_arriba_guardado]
-  1006 00000CEE 4883E930                    sub     rcx, 48
-  1007 00000CF2 48890C25[04060000]          mov     [estats_mov_arriba], rcx
+  1005 00000CD2 488B0C25[38060000]          mov     rcx, [estats_mov_abajo_der_guardado]
+  1006 00000CDA 4883E930                    sub     rcx, 48
+  1007 00000CDE 48890C25[12060000]          mov     [estats_mov_abajo_der], rcx
   1008                                  
-  1009 00000CFA 488B0C25[FB050000]          mov     rcx, [estats_mov_arriba_izq_guardado]
-  1010 00000D02 4883E930                    sub     rcx, 48
-  1011 00000D06 48890C25[34060000]          mov     [estats_mov_arriba_izq], rcx
+  1009 00000CE6 488B0C25[35060000]          mov     rcx, [estats_mov_arriba_guardado]
+  1010 00000CEE 4883E930                    sub     rcx, 48
+  1011 00000CF2 48890C25[FA050000]          mov     [estats_mov_arriba], rcx
   1012                                  
-  1013 00000D0E 488B0C25[FA050000]          mov     rcx, [estats_mov_arriba_der_guardado]
-  1014 00000D16 4883E930                    sub     rcx, 48
-  1015 00000D1A 48890C25[2C060000]          mov     [estats_mov_arriba_der], rcx
+  1013 00000CFA 488B0C25[3B060000]          mov     rcx, [estats_mov_arriba_izq_guardado]
+  1014 00000D02 4883E930                    sub     rcx, 48
+  1015 00000D06 48890C25[2A060000]          mov     [estats_mov_arriba_izq], rcx
   1016                                  
-  1017 00000D22 488B0C25[F7050000]          mov     rcx, [estats_mov_der_guardado]
-  1018 00000D2A 4883E930                    sub     rcx, 48
-  1019 00000D2E 48890C25[14060000]          mov     [estats_mov_der], rcx
+  1017 00000D0E 488B0C25[3A060000]          mov     rcx, [estats_mov_arriba_der_guardado]
+  1018 00000D16 4883E930                    sub     rcx, 48
+  1019 00000D1A 48890C25[22060000]          mov     [estats_mov_arriba_der], rcx
   1020                                  
-  1021 00000D36 488B0C25[F6050000]          mov     rcx, [estats_mov_izq_guardado]
-  1022 00000D3E 4883E930                    sub     rcx, 48
-  1023 00000D42 48890C25[0C060000]          mov     [estats_mov_izq], rcx
-  1024 00000D4A C3                      ret
-  1025                                  
-  1026                                  convertirEstadisticasAStr:
-  1027 00000D4B 488B0C25[E1010000]          mov     rcx, [turno]
-  1028 00000D53 4883C130                    add     rcx, 48
-  1029 00000D57 48890C25[F2050000]          mov     [turnoGuardado], rcx
-  1030                                  
-  1031 00000D5F 488B0C25[38030000]          mov     rcx, [cantidad_ocas_eliminadas]
-  1032 00000D67 4883C130                    add     rcx, 48
-  1033 00000D6B 48890C25[F3050000]          mov     [cantOcasEliminadas], rcx
+  1021 00000D22 488B0C25[37060000]          mov     rcx, [estats_mov_der_guardado]
+  1022 00000D2A 4883E930                    sub     rcx, 48
+  1023 00000D2E 48890C25[0A060000]          mov     [estats_mov_der], rcx
+  1024                                  
+  1025 00000D36 488B0C25[36060000]          mov     rcx, [estats_mov_izq_guardado]
+  1026 00000D3E 4883E930                    sub     rcx, 48
+  1027 00000D42 48890C25[02060000]          mov     [estats_mov_izq], rcx
+  1028 00000D4A C3                      ret
+  1029                                  
+  1030                                  convertirEstadisticasAStr:
+  1031 00000D4B 488B0C25[E1010000]          mov     rcx, [turno]
+  1032 00000D53 4883C130                    add     rcx, 48
+  1033 00000D57 48890C25[32060000]          mov     [turnoGuardado], rcx
   1034                                  
-  1035 00000D73 488B0C25[FC050000]          mov     rcx, [estats_mov_abajo]
-  1036 00000D7B 4883C130                    add     rcx, 48
-  1037 00000D7F 48890C25[F4050000]          mov     [estats_mov_abajo_guardado], rcx
+  1035 00000D5F 488B0C25[38030000]          mov     rcx, [cantidad_ocas_eliminadas]
+  1036 00000D67 4883C130                    add     rcx, 48
+  1037 00000D6B 48890C25[33060000]          mov     [cantOcasEliminadas], rcx
   1038                                  
-  1039 00000D87 488B0C25[24060000]          mov     rcx, [estats_mov_abajo_izq]
-  1040 00000D8F 4883C130                    add     rcx, 48
-  1041 00000D93 48890C25[F9050000]          mov     [estats_mov_abajo_izq_guardado], rcx
+  1039 00000D73 488B0C25[F2050000]          mov     rcx, [estats_mov_abajo]
+  1040 00000D7B 4883C130                    add     rcx, 48
+  1041 00000D7F 48890C25[34060000]          mov     [estats_mov_abajo_guardado], rcx
   1042                                  
-  1043 00000D9B 488B0C25[1C060000]          mov     rcx, [estats_mov_abajo_der]
-  1044 00000DA3 4883C130                    add     rcx, 48
-  1045 00000DA7 48890C25[F8050000]          mov     [estats_mov_abajo_der_guardado], rcx
+  1043 00000D87 488B0C25[1A060000]          mov     rcx, [estats_mov_abajo_izq]
+  1044 00000D8F 4883C130                    add     rcx, 48
+  1045 00000D93 48890C25[39060000]          mov     [estats_mov_abajo_izq_guardado], rcx
   1046                                  
-  1047 00000DAF 488B0C25[04060000]          mov     rcx, [estats_mov_arriba]
-  1048 00000DB7 4883C130                    add     rcx, 48
-  1049 00000DBB 48890C25[F5050000]          mov     [estats_mov_arriba_guardado], rcx
+  1047 00000D9B 488B0C25[12060000]          mov     rcx, [estats_mov_abajo_der]
+  1048 00000DA3 4883C130                    add     rcx, 48
+  1049 00000DA7 48890C25[38060000]          mov     [estats_mov_abajo_der_guardado], rcx
   1050                                  
-  1051 00000DC3 488B0C25[34060000]          mov     rcx, [estats_mov_arriba_izq]
-  1052 00000DCB 4883C130                    add     rcx, 48
-  1053 00000DCF 48890C25[FB050000]          mov     [estats_mov_arriba_izq_guardado], rcx
+  1051 00000DAF 488B0C25[FA050000]          mov     rcx, [estats_mov_arriba]
+  1052 00000DB7 4883C130                    add     rcx, 48
+  1053 00000DBB 48890C25[35060000]          mov     [estats_mov_arriba_guardado], rcx
   1054                                  
-  1055 00000DD7 488B0C25[2C060000]          mov     rcx, [estats_mov_arriba_der]
-  1056 00000DDF 4883C130                    add     rcx, 48
-  1057 00000DE3 48890C25[FA050000]          mov     [estats_mov_arriba_der_guardado], rcx
+  1055 00000DC3 488B0C25[2A060000]          mov     rcx, [estats_mov_arriba_izq]
+  1056 00000DCB 4883C130                    add     rcx, 48
+  1057 00000DCF 48890C25[3B060000]          mov     [estats_mov_arriba_izq_guardado], rcx
   1058                                  
-  1059 00000DEB 488B0C25[14060000]          mov     rcx, [estats_mov_der]
-  1060 00000DF3 4883C130                    add     rcx, 48
-  1061 00000DF7 48890C25[F7050000]          mov     [estats_mov_der_guardado], rcx
+  1059 00000DD7 488B0C25[22060000]          mov     rcx, [estats_mov_arriba_der]
+  1060 00000DDF 4883C130                    add     rcx, 48
+  1061 00000DE3 48890C25[3A060000]          mov     [estats_mov_arriba_der_guardado], rcx
   1062                                  
-  1063 00000DFF 488B0C25[0C060000]          mov     rcx, [estats_mov_izq]
-  1064 00000E07 4883C130                    add     rcx, 48
-  1065 00000E0B 48890C25[F6050000]          mov     [estats_mov_izq_guardado], rcx
+  1063 00000DEB 488B0C25[0A060000]          mov     rcx, [estats_mov_der]
+  1064 00000DF3 4883C130                    add     rcx, 48
+  1065 00000DF7 48890C25[37060000]          mov     [estats_mov_der_guardado], rcx
   1066                                  
-  1067 00000E13 C60425[FC050000]0A          mov     byte[estadisticas+10], 10
-  1068                                  
-  1069 00000E1B C3                      ret
-  1070                                  sumarEstadisticaMovimiento:
-  1071 00000E1C 4829FF                      sub rdi, rdi
-  1072 00000E1F 48BF-                       mov rdi, input_zorro
-  1072 00000E21 [7301000000000000] 
-  1073 00000E29 488B07                      mov rax, [rdi]
-  1074                                  
-  1075                                  movimiento_arriba:
-  1076 00000E2C 4883F877                    cmp rax, 'w'
-  1077 00000E30 750B                        jne movimiento_abajo
-  1078 00000E32 48830425[04060000]-         add qword[estats_mov_arriba], 1
-  1078 00000E3A 01                 
-  1079 00000E3B EB65                        jmp fin_estadisticas_mov
-  1080                                  
-  1081                                  movimiento_abajo:
-  1082 00000E3D 3C73                        cmp al, 's'
-  1083 00000E3F 750B                        jne movimiento_izq
-  1084 00000E41 48830425[FC050000]-         add qword[estats_mov_abajo], 1
-  1084 00000E49 01                 
-  1085 00000E4A EB56                        jmp fin_estadisticas_mov
-  1086                                  
-  1087                                  movimiento_izq:
-  1088 00000E4C 3C61                        cmp al, 'a'
-  1089 00000E4E 750B                        jne movimiento_derecha
-  1090 00000E50 48830425[0C060000]-         add qword[estats_mov_izq], 1
-  1090 00000E58 01                 
-  1091 00000E59 EB47                        jmp fin_estadisticas_mov
-  1092                                  
-  1093                                  movimiento_derecha:
-  1094 00000E5B 3C64                        cmp al, 'd'
-  1095 00000E5D 750B                        jne movimiento_arriba_der
-  1096 00000E5F 48830425[14060000]-         add qword[estats_mov_der], 1
-  1096 00000E67 01                 
-  1097 00000E68 EB38                        jmp fin_estadisticas_mov
-  1098                                  
-  1099                                  movimiento_arriba_der:
-  1100 00000E6A 3C65                        cmp al, 'e'
-  1101 00000E6C 750B                        jne movimiento_arriba_izq
-  1102 00000E6E 48830425[2C060000]-         add qword[estats_mov_arriba_der], 1
-  1102 00000E76 01                 
-  1103 00000E77 EB29                        jmp fin_estadisticas_mov
-  1104                                  
-  1105                                  movimiento_arriba_izq:
-  1106 00000E79 3C71                        cmp al, 'q'
-  1107 00000E7B 750B                        jne movimiento_abajo_izq
-  1108 00000E7D 48830425[34060000]-         add qword[estats_mov_arriba_izq], 1
-  1108 00000E85 01                 
-  1109 00000E86 EB1A                        jmp fin_estadisticas_mov
-  1110                                  
-  1111                                  movimiento_abajo_izq:
-  1112 00000E88 3C7A                        cmp al, 'z'
-  1113 00000E8A 750B                        jne movimiento_abajo_der
-  1114 00000E8C 48830425[24060000]-         add qword[estats_mov_abajo_izq], 1
-  1114 00000E94 01                 
-  1115 00000E95 EB0B                        jmp fin_estadisticas_mov
-  1116                                  
-  1117                                  movimiento_abajo_der:
-  1118 00000E97 3C78                        cmp al, 'x'
-  1119 00000E99 48830425[1C060000]-         add qword[estats_mov_abajo_der], 1
-  1119 00000EA1 01                 
-  1120                                  
-  1121                                  fin_estadisticas_mov:
-  1122 00000EA2 C3                      ret
-  1123                                  
-  1124                                  mostrar_estadisticas:
+  1067 00000DFF 488B0C25[02060000]          mov     rcx, [estats_mov_izq]
+  1068 00000E07 4883C130                    add     rcx, 48
+  1069 00000E0B 48890C25[36060000]          mov     [estats_mov_izq_guardado], rcx
+  1070                                  
+  1071 00000E13 C3                      ret
+  1072                                  sumarEstadisticaMovimiento:
+  1073 00000E14 4829FF                      sub rdi, rdi
+  1074 00000E17 48BF-                       mov rdi, input_zorro
+  1074 00000E19 [7301000000000000] 
+  1075 00000E21 488B07                      mov rax, [rdi]
+  1076                                  
+  1077                                  movimiento_arriba:
+  1078 00000E24 4883F877                    cmp rax, 'w'
+  1079 00000E28 750B                        jne movimiento_abajo
+  1080 00000E2A 48830425[FA050000]-         add qword[estats_mov_arriba], 1
+  1080 00000E32 01                 
+  1081 00000E33 EB65                        jmp fin_estadisticas_mov
+  1082                                  
+  1083                                  movimiento_abajo:
+  1084 00000E35 3C73                        cmp al, 's'
+  1085 00000E37 750B                        jne movimiento_izq
+  1086 00000E39 48830425[F2050000]-         add qword[estats_mov_abajo], 1
+  1086 00000E41 01                 
+  1087 00000E42 EB56                        jmp fin_estadisticas_mov
+  1088                                  
+  1089                                  movimiento_izq:
+  1090 00000E44 3C61                        cmp al, 'a'
+  1091 00000E46 750B                        jne movimiento_derecha
+  1092 00000E48 48830425[02060000]-         add qword[estats_mov_izq], 1
+  1092 00000E50 01                 
+  1093 00000E51 EB47                        jmp fin_estadisticas_mov
+  1094                                  
+  1095                                  movimiento_derecha:
+  1096 00000E53 3C64                        cmp al, 'd'
+  1097 00000E55 750B                        jne movimiento_arriba_der
+  1098 00000E57 48830425[0A060000]-         add qword[estats_mov_der], 1
+  1098 00000E5F 01                 
+  1099 00000E60 EB38                        jmp fin_estadisticas_mov
+  1100                                  
+  1101                                  movimiento_arriba_der:
+  1102 00000E62 3C65                        cmp al, 'e'
+  1103 00000E64 750B                        jne movimiento_arriba_izq
+  1104 00000E66 48830425[22060000]-         add qword[estats_mov_arriba_der], 1
+  1104 00000E6E 01                 
+  1105 00000E6F EB29                        jmp fin_estadisticas_mov
+  1106                                  
+  1107                                  movimiento_arriba_izq:
+  1108 00000E71 3C71                        cmp al, 'q'
+  1109 00000E73 750B                        jne movimiento_abajo_izq
+  1110 00000E75 48830425[2A060000]-         add qword[estats_mov_arriba_izq], 1
+  1110 00000E7D 01                 
+  1111 00000E7E EB1A                        jmp fin_estadisticas_mov
+  1112                                  
+  1113                                  movimiento_abajo_izq:
+  1114 00000E80 3C7A                        cmp al, 'z'
+  1115 00000E82 750B                        jne movimiento_abajo_der
+  1116 00000E84 48830425[1A060000]-         add qword[estats_mov_abajo_izq], 1
+  1116 00000E8C 01                 
+  1117 00000E8D EB0B                        jmp fin_estadisticas_mov
+  1118                                  
+  1119                                  movimiento_abajo_der:
+  1120 00000E8F 3C78                        cmp al, 'x'
+  1121 00000E91 48830425[12060000]-         add qword[estats_mov_abajo_der], 1
+  1121 00000E99 01                 
+  1122                                  
+  1123                                  fin_estadisticas_mov:
+  1124 00000E9A C3                      ret
   1125                                  
-  1126 00000EA3 48BF-                       mov rdi, msg_mov_abajo
-  1126 00000EA5 [4003000000000000] 
-  1127 00000EAD 4829F6                      sub rsi, rsi
-  1128 00000EB0 488B3425[FC050000]          mov rsi, [estats_mov_abajo]
-  1129                                      mPrintF
-    16 00000EB8 4883EC08            <1>  sub rsp,8
-    17 00000EBC E8(00000000)        <1>  call printf
-    18 00000EC1 4883C408            <1>  add rsp,8
-  1130 00000EC5 48BF-                       mov rdi, salto_linea
-  1130 00000EC7 [3100000000000000] 
-  1131                                      mPuts
-     4 00000ECF 4883EC08            <1>  sub rsp,8
-     5 00000ED3 E8(00000000)        <1>  call puts
-     6 00000ED8 4883C408            <1>  add rsp,8
-  1132                                      
-  1133                                  
-  1134 00000EDC 48BF-                       mov rdi, msg_mov_abajo_der
-  1134 00000EDE [A303000000000000] 
-  1135 00000EE6 4829F6                      sub rsi, rsi
-  1136 00000EE9 488B3425[1C060000]          mov rsi, [estats_mov_abajo_der]
-  1137                                      mPrintF
-    16 00000EF1 4883EC08            <1>  sub rsp,8
-    17 00000EF5 E8(00000000)        <1>  call printf
-    18 00000EFA 4883C408            <1>  add rsp,8
-  1138 00000EFE 48BF-                       mov rdi, salto_linea
-  1138 00000F00 [3100000000000000] 
-  1139                                      mPuts
-     4 00000F08 4883EC08            <1>  sub rsp,8
-     5 00000F0C E8(00000000)        <1>  call puts
-     6 00000F11 4883C408            <1>  add rsp,8
-  1140                                      
-  1141                                  
-  1142 00000F15 48BF-                       mov rdi, msg_mov_abajo_izq
-  1142 00000F17 [C403000000000000] 
-  1143 00000F1F 4829F6                      sub rsi, rsi
-  1144 00000F22 488B3425[24060000]          mov rsi, [estats_mov_abajo_izq]
-  1145                                      mPrintF
-    16 00000F2A 4883EC08            <1>  sub rsp,8
-    17 00000F2E E8(00000000)        <1>  call printf
-    18 00000F33 4883C408            <1>  add rsp,8
-  1146 00000F37 48BF-                       mov rdi, salto_linea
-  1146 00000F39 [3100000000000000] 
-  1147                                      mPuts
-     4 00000F41 4883EC08            <1>  sub rsp,8
-     5 00000F45 E8(00000000)        <1>  call puts
-     6 00000F4A 4883C408            <1>  add rsp,8
-  1148                                      
-  1149                                  
-  1150 00000F4E 48BF-                       mov rdi, msg_mov_arriba
-  1150 00000F50 [5703000000000000] 
-  1151 00000F58 4829F6                      sub rsi, rsi
-  1152 00000F5B 488B3425[04060000]          mov rsi, [estats_mov_arriba]
-  1153                                      mPrintF
-    16 00000F63 4883EC08            <1>  sub rsp,8
-    17 00000F67 E8(00000000)        <1>  call printf
-    18 00000F6C 4883C408            <1>  add rsp,8
-  1154 00000F70 48BF-                       mov rdi, salto_linea
-  1154 00000F72 [3100000000000000] 
-  1155                                      mPuts
-     4 00000F7A 4883EC08            <1>  sub rsp,8
-     5 00000F7E E8(00000000)        <1>  call puts
-     6 00000F83 4883C408            <1>  add rsp,8
-  1156                                      
-  1157                                  
-  1158 00000F87 48BF-                       mov rdi, msg_mov_arriba_izq
-  1158 00000F89 [0904000000000000] 
-  1159 00000F91 4829F6                      sub rsi, rsi
-  1160 00000F94 488B3425[34060000]          mov rsi, [estats_mov_arriba_izq]
-  1161                                      mPrintF
-    16 00000F9C 4883EC08            <1>  sub rsp,8
-    17 00000FA0 E8(00000000)        <1>  call printf
-    18 00000FA5 4883C408            <1>  add rsp,8
-  1162 00000FA9 48BF-                       mov rdi, salto_linea
-  1162 00000FAB [3100000000000000] 
-  1163                                      mPuts
-     4 00000FB3 4883EC08            <1>  sub rsp,8
-     5 00000FB7 E8(00000000)        <1>  call puts
-     6 00000FBC 4883C408            <1>  add rsp,8
-  1164                                      
-  1165                                  
-  1166 00000FC0 48BF-                       mov rdi, msg_mov_arriba_der
-  1166 00000FC2 [E703000000000000] 
-  1167 00000FCA 4829F6                      sub rsi, rsi
-  1168 00000FCD 488B3425[2C060000]          mov rsi, [estats_mov_arriba_der]
-  1169                                      mPrintF
-    16 00000FD5 4883EC08            <1>  sub rsp,8
-    17 00000FD9 E8(00000000)        <1>  call printf
-    18 00000FDE 4883C408            <1>  add rsp,8
-  1170 00000FE2 48BF-                       mov rdi, salto_linea
-  1170 00000FE4 [3100000000000000] 
-  1171                                      mPuts
-     4 00000FEC 4883EC08            <1>  sub rsp,8
-     5 00000FF0 E8(00000000)        <1>  call puts
-     6 00000FF5 4883C408            <1>  add rsp,8
-  1172                                      
-  1173                                  
-  1174 00000FF9 48BF-                       mov rdi, msg_mov_derecha
-  1174 00000FFB [8A03000000000000] 
-  1175 00001003 4829F6                      sub rsi, rsi
-  1176 00001006 488B3425[14060000]          mov rsi, [estats_mov_der]
-  1177                                      mPrintF
-    16 0000100E 4883EC08            <1>  sub rsp,8
-    17 00001012 E8(00000000)        <1>  call printf
-    18 00001017 4883C408            <1>  add rsp,8
-  1178 0000101B 48BF-                       mov rdi, salto_linea
-  1178 0000101D [3100000000000000] 
-  1179                                      mPuts
-     4 00001025 4883EC08            <1>  sub rsp,8
-     5 00001029 E8(00000000)        <1>  call puts
-     6 0000102E 4883C408            <1>  add rsp,8
-  1180                                      
-  1181                                  
-  1182 00001032 48BF-                       mov rdi, msg_mov_izquierda
-  1182 00001034 [6F03000000000000] 
-  1183 0000103C 4829F6                      sub rsi, rsi
-  1184 0000103F 488B3425[0C060000]          mov rsi, [estats_mov_izq]
-  1185                                      mPrintF
-    16 00001047 4883EC08            <1>  sub rsp,8
-    17 0000104B E8(00000000)        <1>  call printf
-    18 00001050 4883C408            <1>  add rsp,8
-  1186 00001054 48BF-                       mov rdi, salto_linea
-  1186 00001056 [3100000000000000] 
-  1187                                      mPuts
-     4 0000105E 4883EC08            <1>  sub rsp,8
-     5 00001062 E8(00000000)        <1>  call puts
-     6 00001067 4883C408            <1>  add rsp,8
-  1188                                      
-  1189 0000106B C3                      ret
+  1126                                  mostrar_estadisticas:
+  1127                                  
+  1128 00000E9B 48BF-                       mov rdi, msg_mov_abajo
+  1128 00000E9D [4003000000000000] 
+  1129 00000EA5 4829F6                      sub rsi, rsi
+  1130 00000EA8 488B3425[F2050000]          mov rsi, [estats_mov_abajo]
+  1131                                      mPrintF
+    16 00000EB0 4883EC08            <1>  sub rsp,8
+    17 00000EB4 E8(00000000)        <1>  call printf
+    18 00000EB9 4883C408            <1>  add rsp,8
+  1132 00000EBD 48BF-                       mov rdi, salto_linea
+  1132 00000EBF [3100000000000000] 
+  1133                                      mPuts
+     4 00000EC7 4883EC08            <1>  sub rsp,8
+     5 00000ECB E8(00000000)        <1>  call puts
+     6 00000ED0 4883C408            <1>  add rsp,8
+  1134                                      
+  1135                                  
+  1136 00000ED4 48BF-                       mov rdi, msg_mov_abajo_der
+  1136 00000ED6 [A303000000000000] 
+  1137 00000EDE 4829F6                      sub rsi, rsi
+  1138 00000EE1 488B3425[12060000]          mov rsi, [estats_mov_abajo_der]
+  1139                                      mPrintF
+    16 00000EE9 4883EC08            <1>  sub rsp,8
+    17 00000EED E8(00000000)        <1>  call printf
+    18 00000EF2 4883C408            <1>  add rsp,8
+  1140 00000EF6 48BF-                       mov rdi, salto_linea
+  1140 00000EF8 [3100000000000000] 
+  1141                                      mPuts
+     4 00000F00 4883EC08            <1>  sub rsp,8
+     5 00000F04 E8(00000000)        <1>  call puts
+     6 00000F09 4883C408            <1>  add rsp,8
+  1142                                      
+  1143                                  
+  1144 00000F0D 48BF-                       mov rdi, msg_mov_abajo_izq
+  1144 00000F0F [C403000000000000] 
+  1145 00000F17 4829F6                      sub rsi, rsi
+  1146 00000F1A 488B3425[1A060000]          mov rsi, [estats_mov_abajo_izq]
+  1147                                      mPrintF
+    16 00000F22 4883EC08            <1>  sub rsp,8
+    17 00000F26 E8(00000000)        <1>  call printf
+    18 00000F2B 4883C408            <1>  add rsp,8
+  1148 00000F2F 48BF-                       mov rdi, salto_linea
+  1148 00000F31 [3100000000000000] 
+  1149                                      mPuts
+     4 00000F39 4883EC08            <1>  sub rsp,8
+     5 00000F3D E8(00000000)        <1>  call puts
+     6 00000F42 4883C408            <1>  add rsp,8
+  1150                                      
+  1151                                  
+  1152 00000F46 48BF-                       mov rdi, msg_mov_arriba
+  1152 00000F48 [5703000000000000] 
+  1153 00000F50 4829F6                      sub rsi, rsi
+  1154 00000F53 488B3425[FA050000]          mov rsi, [estats_mov_arriba]
+  1155                                      mPrintF
+    16 00000F5B 4883EC08            <1>  sub rsp,8
+    17 00000F5F E8(00000000)        <1>  call printf
+    18 00000F64 4883C408            <1>  add rsp,8
+  1156 00000F68 48BF-                       mov rdi, salto_linea
+  1156 00000F6A [3100000000000000] 
+  1157                                      mPuts
+     4 00000F72 4883EC08            <1>  sub rsp,8
+     5 00000F76 E8(00000000)        <1>  call puts
+     6 00000F7B 4883C408            <1>  add rsp,8
+  1158                                      
+  1159                                  
+  1160 00000F7F 48BF-                       mov rdi, msg_mov_arriba_izq
+  1160 00000F81 [0904000000000000] 
+  1161 00000F89 4829F6                      sub rsi, rsi
+  1162 00000F8C 488B3425[2A060000]          mov rsi, [estats_mov_arriba_izq]
+  1163                                      mPrintF
+    16 00000F94 4883EC08            <1>  sub rsp,8
+    17 00000F98 E8(00000000)        <1>  call printf
+    18 00000F9D 4883C408            <1>  add rsp,8
+  1164 00000FA1 48BF-                       mov rdi, salto_linea
+  1164 00000FA3 [3100000000000000] 
+  1165                                      mPuts
+     4 00000FAB 4883EC08            <1>  sub rsp,8
+     5 00000FAF E8(00000000)        <1>  call puts
+     6 00000FB4 4883C408            <1>  add rsp,8
+  1166                                      
+  1167                                  
+  1168 00000FB8 48BF-                       mov rdi, msg_mov_arriba_der
+  1168 00000FBA [E703000000000000] 
+  1169 00000FC2 4829F6                      sub rsi, rsi
+  1170 00000FC5 488B3425[22060000]          mov rsi, [estats_mov_arriba_der]
+  1171                                      mPrintF
+    16 00000FCD 4883EC08            <1>  sub rsp,8
+    17 00000FD1 E8(00000000)        <1>  call printf
+    18 00000FD6 4883C408            <1>  add rsp,8
+  1172 00000FDA 48BF-                       mov rdi, salto_linea
+  1172 00000FDC [3100000000000000] 
+  1173                                      mPuts
+     4 00000FE4 4883EC08            <1>  sub rsp,8
+     5 00000FE8 E8(00000000)        <1>  call puts
+     6 00000FED 4883C408            <1>  add rsp,8
+  1174                                      
+  1175                                  
+  1176 00000FF1 48BF-                       mov rdi, msg_mov_derecha
+  1176 00000FF3 [8A03000000000000] 
+  1177 00000FFB 4829F6                      sub rsi, rsi
+  1178 00000FFE 488B3425[0A060000]          mov rsi, [estats_mov_der]
+  1179                                      mPrintF
+    16 00001006 4883EC08            <1>  sub rsp,8
+    17 0000100A E8(00000000)        <1>  call printf
+    18 0000100F 4883C408            <1>  add rsp,8
+  1180 00001013 48BF-                       mov rdi, salto_linea
+  1180 00001015 [3100000000000000] 
+  1181                                      mPuts
+     4 0000101D 4883EC08            <1>  sub rsp,8
+     5 00001021 E8(00000000)        <1>  call puts
+     6 00001026 4883C408            <1>  add rsp,8
+  1182                                      
+  1183                                  
+  1184 0000102A 48BF-                       mov rdi, msg_mov_izquierda
+  1184 0000102C [6F03000000000000] 
+  1185 00001034 4829F6                      sub rsi, rsi
+  1186 00001037 488B3425[02060000]          mov rsi, [estats_mov_izq]
+  1187                                      mPrintF
+    16 0000103F 4883EC08            <1>  sub rsp,8
+    17 00001043 E8(00000000)        <1>  call printf
+    18 00001048 4883C408            <1>  add rsp,8
+  1188 0000104C 48BF-                       mov rdi, salto_linea
+  1188 0000104E [3100000000000000] 
+  1189                                      mPuts
+     4 00001056 4883EC08            <1>  sub rsp,8
+     5 0000105A E8(00000000)        <1>  call puts
+     6 0000105F 4883C408            <1>  add rsp,8
+  1190                                      
+  1191 00001063 C3                      ret
