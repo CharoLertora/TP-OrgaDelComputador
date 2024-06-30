@@ -57,14 +57,15 @@ section .data
     mensaje_fin_juego           db "El juego ha sido abandonado.", 0
     mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli",0
     cantidad_ocas_eliminadas    dq 0
-    msg_mov_abajo               db "Movimientos abajo: %hhi",0
-    msg_mov_arriba              db "Movimientos arriba: %hhi",0
-    msg_mov_izquierda           db "Movimientos izquierda: %hhi",0
-    msg_mov_derecha             db "Movimientos derecha: %hhi",0
-    msg_mov_abajo_der           db "Movimientos abajo y derecha: %hhi",0
-    msg_mov_abajo_izq           db "Movimientos abajo e izquierda: %hhi",0
-    msg_mov_arriba_der          db "Movimientos arriba y derecha: %hhi",0
-    msg_mov_arriba_izq          db "Movimientos arriba e izquierda: %hhi",0
+
+    msg_mov_abajo               db "Movimientos abajo: %li",0
+    msg_mov_arriba              db "Movimientos arriba: %li",0
+    msg_mov_izquierda           db "Movimientos izquierda: %li",0
+    msg_mov_derecha             db "Movimientos derecha: %li",0
+    msg_mov_abajo_der           db "Movimientos abajo y derecha: %li",0
+    msg_mov_abajo_izq           db "Movimientos abajo e izquierda: %li",0
+    msg_mov_arriba_der          db "Movimientos arriba y derecha: %li",0
+    msg_mov_arriba_izq          db "Movimientos arriba e izquierda: %li",0
 
     ;Variables de archivo
     archivoTablero              db      "tablero.txt",0
@@ -77,8 +78,8 @@ section .data
     msgLeido                    db      "Leído con éxito.",10,0
     msgErrorConvirt             db      "Error convirtiendo el numero",10,0
     msgErrorEscritura           db      "Error escribiendo el archivo",10,0
-    msgPartidaGuardada          db      "Se ha encontrado una partida guardada, desea continuarla? (si/no)",10,0
-    msgGuardarPartida           db      "Estás saliendo del juego, querés guardar tu partida? (si/no)",10,0
+    msgPartidaGuardada          db      "Se ha encontrado una partida guardada, desea continuarla? (si/no)",0
+    msgGuardarPartida           db      "Estás saliendo del juego, querés guardar tu partida? (si/no)",0
     respuestaSi                 db      "si",0
     registro          times 51  db      " "
     tableroStr        times 51  db      " "
@@ -101,6 +102,14 @@ section .data
     TURNO_ZORRO         equ     1
     TURNO_OCAS          equ     2
 
+    estats_mov_abajo            dq  0
+    estats_mov_arriba           dq  0
+    estats_mov_izq              dq  0
+    estats_mov_der              dq  0
+    estats_mov_abajo_der        dq  0
+    estats_mov_abajo_izq        dq  0
+    estats_mov_arriba_der       dq  0
+    estats_mov_arriba_izq       dq  0
 
 section .bss
     buffer          resb 350  ; Suficiente espacio para el tablero con saltos de línea
@@ -114,14 +123,6 @@ section .bss
     nombre_jugador2 resb 50
     turno           resb 1
     comio_oca       resb 1
-    estats_mov_abajo            resb 1
-    estats_mov_arriba           resb 1
-    estats_mov_izq              resb 1
-    estats_mov_der              resb 1
-    estats_mov_abajo_der        resb 1
-    estats_mov_abajo_izq        resb 1
-    estats_mov_arriba_der       resb 1
-    estats_mov_arriba_izq       resb 1
 
     ;Variables de archivo
     handleArchTablero           resq  1
@@ -135,15 +136,7 @@ section .bss
 section .text
 main:
     mov     byte[turno], TURNO_ZORRO
-    mov     byte[estats_mov_abajo], 0
-    mov     byte[estats_mov_arriba], 0
-    mov     byte[estats_mov_izq], 0
-    mov     byte[estats_mov_der], 0
-    mov     byte[estats_mov_abajo_der], 0
-    mov     byte[estats_mov_abajo_izq], 0
-    mov     byte[estats_mov_arriba_der], 0
-    mov     byte[estats_mov_arriba_izq], 0
-    
+
     mov     rdi, archivoTablero
     call    abrirLecturaArchivoTablero
     cmp     rax, 0
@@ -212,6 +205,9 @@ turno_zorro:
     add     rsp,8
     cmp     byte [input_valido], 'R'  ;comparo si el movimiento del zorro fue inválido
     je      turno_zorro              ;si fue inválido, vuelvo a pedir movimiento del zorro
+    sub     rsp, 8
+    call    sumarEstadisticaMovimiento
+    add     rsp, 8
     cmp     byte [comio_oca], TURNO_ZORRO      ; Si comió una oca, no cambiar de turno
     je      continuar_juego
     mov     byte [turno], TURNO_OCAS          ;si fue válido y no comió oca, cambio el turno a las ocas
@@ -449,7 +445,6 @@ validar_movimiento_zorro:
     mov byte [rbx], 3           ; Colocar al zorro en la nueva posición
     mov byte [comio_oca], 0     ; Indicar que no comió oca
     mov byte [input_valido], 'S' ; Indicar que el movimiento fue válido
-    call    sumarEstadisticaMovimiento
     ret
 
 verificar_si_oca:
@@ -741,7 +736,7 @@ errorEscritura:
 guardar_partida:
     mov     rdi, archivoTablero
     call    abrirEscrituraArchivoTablero
-
+    
     mov     rdi, msgGuardarPartida
     mPuts
     mov     rdi, respuestaPartidaGuardada
@@ -765,7 +760,6 @@ guardar_partida:
     cmp     rax, 0
     jle     errorEscritura
     call    cerrarArchivoEstadisticas
-
     jmp     fin_juego
 ganador_zorro:
     ; Imprimir el mensaje del ganador y finalizar el juego
@@ -788,7 +782,9 @@ noGuardarPartida:
     call    abrirEscrituraArchivoEstadisticas
     call    cerrarArchivoEstadisticas
 fin_juego:
+    sub     rsp, 8
     call    mostrar_estadisticas
+    add     rsp, 8
     mov     rdi, mensaje_fin_juego  ; Imprimir el mensaje de fin del juego
     mPuts
     mov     eax, 60                 ; syscall: exit
@@ -1036,90 +1032,91 @@ convertirEstadisticasAStr:
     add     rcx, 48
     mov     [cantOcasEliminadas], rcx
 
-    mov     rcx, [estats_mov_abajo_guardado]
+    mov     rcx, [estats_mov_abajo]
     add     rcx, 48
-    mov     [estats_mov_abajo], rcx
+    mov     [estats_mov_abajo_guardado], rcx
 
-    mov     rcx, [estats_mov_abajo_izq_guardado]
+    mov     rcx, [estats_mov_abajo_izq]
     add     rcx, 48
-    mov     [estats_mov_abajo_izq], rcx
+    mov     [estats_mov_abajo_izq_guardado], rcx
 
-    mov     rcx, [estats_mov_abajo_der_guardado]
+    mov     rcx, [estats_mov_abajo_der]
     add     rcx, 48
-    mov     [estats_mov_abajo_der], rcx
+    mov     [estats_mov_abajo_der_guardado], rcx
 
-    mov     rcx, [estats_mov_arriba_guardado]
+    mov     rcx, [estats_mov_arriba]
     add     rcx, 48
-    mov     [estats_mov_arriba], rcx
+    mov     [estats_mov_arriba_guardado], rcx
 
-    mov     rcx, [estats_mov_arriba_izq_guardado]
+    mov     rcx, [estats_mov_arriba_izq]
     add     rcx, 48
-    mov     [estats_mov_arriba_izq], rcx
+    mov     [estats_mov_arriba_izq_guardado], rcx
 
-    mov     rcx, [estats_mov_arriba_der_guardado]
+    mov     rcx, [estats_mov_arriba_der]
     add     rcx, 48
-    mov     [estats_mov_arriba_der], rcx
+    mov     [estats_mov_arriba_der_guardado], rcx
 
-    mov     rcx, [estats_mov_der_guardado]
+    mov     rcx, [estats_mov_der]
     add     rcx, 48
-    mov     [estats_mov_der], rcx
+    mov     [estats_mov_der_guardado], rcx
 
-    mov     rcx, [estats_mov_izq_guardado]
+    mov     rcx, [estats_mov_izq]
     add     rcx, 48
-    mov     [estats_mov_izq], rcx
+    mov     [estats_mov_izq_guardado], rcx
 
     mov     byte[estadisticas+10], 10
 
 ret
-
 sumarEstadisticaMovimiento:
+    sub rdi, rdi
     mov rdi, input_zorro
-    mov al, [rdi]
-    
-    cmp al, 'w'
+    mov rax, [rdi]
+
+movimiento_arriba:
+    cmp rax, 'w'
     jne movimiento_abajo
-    inc byte[estats_mov_arriba]
+    add qword[estats_mov_arriba], 1
     jmp fin_estadisticas_mov
 
 movimiento_abajo:
     cmp al, 's'
     jne movimiento_izq
-    inc byte[estats_mov_abajo]
+    add qword[estats_mov_abajo], 1
     jmp fin_estadisticas_mov
 
 movimiento_izq:
     cmp al, 'a'
     jne movimiento_derecha
-    inc byte[estats_mov_izq]
+    add qword[estats_mov_izq], 1
     jmp fin_estadisticas_mov
 
 movimiento_derecha:
     cmp al, 'd'
     jne movimiento_arriba_der
-    inc byte[estats_mov_der]
+    add qword[estats_mov_der], 1
     jmp fin_estadisticas_mov
 
 movimiento_arriba_der:
     cmp al, 'e'
     jne movimiento_arriba_izq
-    inc byte[estats_mov_arriba_der]
+    add qword[estats_mov_arriba_der], 1
     jmp fin_estadisticas_mov
 
 movimiento_arriba_izq:
     cmp al, 'q'
     jne movimiento_abajo_izq
-    inc byte[estats_mov_arriba_izq]
+    add qword[estats_mov_arriba_izq], 1
     jmp fin_estadisticas_mov
 
 movimiento_abajo_izq:
     cmp al, 'z'
     jne movimiento_abajo_der
-    inc byte[estats_mov_abajo_izq]
+    add qword[estats_mov_abajo_izq], 1
     jmp fin_estadisticas_mov
 
 movimiento_abajo_der:
     cmp al, 'x'
-    inc byte[estats_mov_abajo_der]
+    add qword[estats_mov_abajo_der], 1
 
 fin_estadisticas_mov:
 ret
@@ -1130,39 +1127,63 @@ mostrar_estadisticas:
     sub rsi, rsi
     mov rsi, [estats_mov_abajo]
     mPrintF
+    mov rdi, salto_linea
+    mPuts
+    
 
     mov rdi, msg_mov_abajo_der
     sub rsi, rsi
     mov rsi, [estats_mov_abajo_der]
     mPrintF
+    mov rdi, salto_linea
+    mPuts
+    
 
     mov rdi, msg_mov_abajo_izq
     sub rsi, rsi
     mov rsi, [estats_mov_abajo_izq]
     mPrintF
+    mov rdi, salto_linea
+    mPuts
+    
 
     mov rdi, msg_mov_arriba
     sub rsi, rsi
     mov rsi, [estats_mov_arriba]
     mPrintF
+    mov rdi, salto_linea
+    mPuts
+    
 
     mov rdi, msg_mov_arriba_izq
     sub rsi, rsi
     mov rsi, [estats_mov_arriba_izq]
     mPrintF
+    mov rdi, salto_linea
+    mPuts
+    
 
     mov rdi, msg_mov_arriba_der
     sub rsi, rsi
     mov rsi, [estats_mov_arriba_der]
     mPrintF
+    mov rdi, salto_linea
+    mPuts
+    
 
     mov rdi, msg_mov_derecha
     sub rsi, rsi
     mov rsi, [estats_mov_der]
     mPrintF
+    mov rdi, salto_linea
+    mPuts
+    
 
     mov rdi, msg_mov_izquierda
     sub rsi, rsi
     mov rsi, [estats_mov_izq]
     mPrintF
+    mov rdi, salto_linea
+    mPuts
+    
 ret
