@@ -72,6 +72,14 @@ section .data
     modoAperturaRead            db      "r",0   ; Abro y leo un archivo de texto
     modoAperturaWrite           db      "w",0
     archivoEstadisticas         db      "estadisticas.txt",0
+    estats_mov_abajo            dq  0
+    estats_mov_arriba           dq  0
+    estats_mov_izq              dq  0
+    estats_mov_der              dq  0
+    estats_mov_abajo_der        dq  0
+    estats_mov_abajo_izq        dq  0
+    estats_mov_arriba_der       dq  0
+    estats_mov_arriba_izq       dq  0
 
     msgErrorAp                  db      "Lo sentimos, no se pudo abrir el archivo.",10,0
     msgErrorLectura             db      "No se encontró una partida guardada, se iniciará una nueva.",10,0
@@ -84,27 +92,10 @@ section .data
     registro          times 51  db      " "
     tableroStr        times 51  db      " "
     
-    estats_mov_abajo            dq  0
-    estats_mov_arriba           dq  0
-    estats_mov_izq              dq  0
-    estats_mov_der              dq  0
-    estats_mov_abajo_der        dq  0
-    estats_mov_abajo_izq        dq  0
-    estats_mov_arriba_der       dq  0
-    estats_mov_arriba_izq       dq  0
     
     estadisticas      times 0   db      ''
         turnoGuardado                        db     " "
         cantOcasEliminadas                   db     " "
-        estats_mov_abajo_guardado            db     " "
-        estats_mov_arriba_guardado           db     " "
-        estats_mov_izq_guardado              db     " "
-        estats_mov_der_guardado              db     " "
-        estats_mov_abajo_der_guardado        db     " "
-        estats_mov_abajo_izq_guardado        db     " "
-        estats_mov_arriba_der_guardado       db     " "
-        estats_mov_arriba_izq_guardado       db     " "
-        salto_linea_archivo                  db     " "
         
 
     CANT_FIL_COL        equ     7
@@ -843,7 +834,7 @@ ret
 
 leerArchivoEstadisticas:
     mov     rdi, estadisticas
-    mov     rsi, 12
+    mov     rsi, 3
     mov     rdx, [handleArchEstadisticas]
     call    fgets
 
@@ -994,37 +985,6 @@ cargarEstadisticas:
     sub     rcx, 48
     mov     [cantidad_ocas_eliminadas], rcx
 
-    mov     rcx, [estats_mov_abajo_guardado]
-    sub     rcx, 48
-    mov     [estats_mov_abajo], rcx
-
-    mov     rcx, [estats_mov_abajo_izq_guardado]
-    sub     rcx, 48
-    mov     [estats_mov_abajo_izq], rcx
-
-    mov     rcx, [estats_mov_abajo_der_guardado]
-    sub     rcx, 48
-    mov     [estats_mov_abajo_der], rcx
-
-    mov     rcx, [estats_mov_arriba_guardado]
-    sub     rcx, 48
-    mov     [estats_mov_arriba], rcx
-
-    mov     rcx, [estats_mov_arriba_izq_guardado]
-    sub     rcx, 48
-    mov     [estats_mov_arriba_izq], rcx
-
-    mov     rcx, [estats_mov_arriba_der_guardado]
-    sub     rcx, 48
-    mov     [estats_mov_arriba_der], rcx
-
-    mov     rcx, [estats_mov_der_guardado]
-    sub     rcx, 48
-    mov     [estats_mov_der], rcx
-
-    mov     rcx, [estats_mov_izq_guardado]
-    sub     rcx, 48
-    mov     [estats_mov_izq], rcx
 ret
 
 convertirEstadisticasAStr:
@@ -1036,40 +996,7 @@ convertirEstadisticasAStr:
     add     rcx, 48
     mov     [cantOcasEliminadas], rcx
 
-    mov     rcx, [estats_mov_abajo]
-    add     rcx, 48
-    mov     [estats_mov_abajo_guardado], rcx
-
-    mov     rcx, [estats_mov_abajo_izq]
-    add     rcx, 48
-    mov     [estats_mov_abajo_izq_guardado], rcx
-
-    mov     rcx, [estats_mov_abajo_der]
-    add     rcx, 48
-    mov     [estats_mov_abajo_der_guardado], rcx
-
-    mov     rcx, [estats_mov_arriba]
-    add     rcx, 48
-    mov     [estats_mov_arriba_guardado], rcx
-
-    mov     rcx, [estats_mov_arriba_izq]
-    add     rcx, 48
-    mov     [estats_mov_arriba_izq_guardado], rcx
-
-    mov     rcx, [estats_mov_arriba_der]
-    add     rcx, 48
-    mov     [estats_mov_arriba_der_guardado], rcx
-
-    mov     rcx, [estats_mov_der]
-    add     rcx, 48
-    mov     [estats_mov_der_guardado], rcx
-
-    mov     rcx, [estats_mov_izq]
-    add     rcx, 48
-    mov     [estats_mov_izq_guardado], rcx
-
-    mov     rcx, 10
-    mov     [salto_linea_archivo], rcx
+    mov     byte[estadisticas+2], 10
 
 ret
 sumarEstadisticaMovimiento:
