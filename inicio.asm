@@ -57,6 +57,14 @@ section .data
     mensaje_fin_juego           db "El juego ha sido abandonado.", 0
     mensaje_ocas_eliminadas     db "Ocas eliminadas: %lli",0
     cantidad_ocas_eliminadas    dq 0
+    coordenadas_columnas        db " 1  2  3  4  5  6  7", 0
+    numero_fila_1 db '1', 0
+    numero_fila_2 db '2', 0
+    numero_fila_3 db '3', 0
+    numero_fila_4 db '4', 0
+    numero_fila_5 db '5', 0
+    numero_fila_6 db '6', 0
+    numero_fila_7 db '7', 0
 
     msg_mov_abajo               db "Movimientos abajo: %li",0
     msg_mov_arriba              db "Movimientos arriba: %li",0
@@ -330,8 +338,58 @@ imprimir_espacio_vacio:
 continuar_construyendo_tablero:
     inc     r10                ; Incrementar en uno para tener la siguiente columna
     cmp     r10, 8             ; Si no llegué a la columna 7, construyo el siguiente elemento de la misma fila              
-    jl      imprimir_siguiente_caracter       
+    jl      imprimir_siguiente_caracter  
+    ; Añadir el número de la fila antes del salto de línea
+    cmp     rbx, 1
+    je      imprimir_fila_1
+    cmp     rbx, 2
+    je      imprimir_fila_2
+    cmp     rbx, 3
+    je      imprimir_fila_3
+    cmp     rbx, 4
+    je      imprimir_fila_4
+    cmp     rbx, 5
+    je      imprimir_fila_5
+    cmp     rbx, 6
+    je      imprimir_fila_6
+    cmp     rbx, 7
+    je      imprimir_fila_7   
+    
+imprimir_fila_1:
+    mov     al, [numero_fila_1]
+    stosb
+    jmp     imprimir_salto_linea
 
+imprimir_fila_2:
+    mov     al, [numero_fila_2]
+    stosb
+    jmp     imprimir_salto_linea
+
+imprimir_fila_3:
+    mov     al, [numero_fila_3]
+    stosb
+    jmp     imprimir_salto_linea
+
+imprimir_fila_4:
+    mov     al, [numero_fila_4]
+    stosb
+    jmp     imprimir_salto_linea
+
+imprimir_fila_5:
+    mov     al, [numero_fila_5]
+    stosb
+    jmp     imprimir_salto_linea
+
+imprimir_fila_6:
+    mov     al, [numero_fila_6]
+    stosb
+    jmp     imprimir_salto_linea
+
+imprimir_fila_7:
+    mov     al, [numero_fila_7]
+    stosb
+      
+imprimir_salto_linea:
     ; Añadir un salto de línea al final de la fila
     mov     al, [salto_linea]
     stosb
@@ -346,6 +404,8 @@ fin_construir_tablero:
     ret
 
 imprimir_tablero:
+    mov     rdi, coordenadas_columnas
+    mPuts
     mov     rdi, buffer
     mPuts
     mov rdi, mensaje_ocas_eliminadas
