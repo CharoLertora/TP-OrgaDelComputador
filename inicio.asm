@@ -244,24 +244,27 @@ ingresar_nombres_y_simbolos_jugadores:
     mov     rdi, input_zorro
     mGets
     mov     al, [input_zorro]
-    cmp     al, 0   ; verifico si se presiono enter
+    cmp     al, 0                   ; verifico si se presiono enter
     je      usar_default_zorro
-    mov     [simbolo_zorro], al    ; se guarda el primer símbolo ingresado por el usuario
+    mov     [simbolo_zorro], al     ; se guarda el primer símbolo ingresado por el usuario
     jmp     ingresar_simbolo_oca
+
 usar_default_zorro:
     mov     byte [simbolo_zorro], 'X' ; se asigna el símbolo por defecto para el zorro
+
 ingresar_simbolo_oca:
     mov     rdi, mensaje_ingresar_simbolo_oca
     mPuts
     mov     rdi, input_oca
     mGets
     mov     al, [input_oca]
-    cmp     al, 0     ; verifico si se presiono enter
+    cmp     al, 0                   ; verifico si se presiono enter
     je      usar_default_oca
-    mov     [simbolo_oca], al    ; se guarda el primer símbolo ingresado por el usuario
+    mov     [simbolo_oca], al       ; se guarda el primer símbolo ingresado por el usuario
     jmp     construir_tablero
+
 usar_default_oca:
-    mov     byte [simbolo_oca], 'O'   ; se
+    mov     byte [simbolo_oca], 'O'   ; se asigna el símbolo por defecto para las ocas
 
 
 construir_tablero:
