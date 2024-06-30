@@ -220,21 +220,27 @@ ingresar_nombres_y_simbolos_jugadores:
     mGets
     mov     rdi, mensaje_ingresar_simbolo_zorro
     mPuts
-    mov     rdi, simbolo_zorro
-    mov     rsi, simbolo_zorro
+    mov     rdi, input_zorro
     mGets
-    cmp     byte [simbolo_zorro], 0   ; verifico si se presiono enter
-    jne     skip_default_zorro        ; si no es enter, se utiliza el del usuario que se guardo en simbolo_zorro
-    mov     byte [simbolo_zorro], 'X' ; se asigna el símbolo por defecto para el zorro, pisando en caso de enter
-skip_default_zorro:
+    mov     al, [input_zorro]
+    cmp     al, 0   ; verifico si se presiono enter
+    je      usar_default_zorro
+    mov     [simbolo_zorro], al    ; se guarda el primer símbolo ingresado por el usuario
+    jmp     ingresar_simbolo_oca
+usar_default_zorro:
+    mov     byte [simbolo_zorro], 'X' ; se asigna el símbolo por defecto para el zorro
+ingresar_simbolo_oca:
     mov     rdi, mensaje_ingresar_simbolo_oca
     mPuts
-    mov     rdi, simbolo_oca
-    mov     rsi, simbolo_oca
+    mov     rdi, input_oca
     mGets
-    cmp     byte [simbolo_oca], 0     ; verifico si se presiono enter
-    jne     construir_tablero          ; si no es enter, se utiliza el del usuario que se guardo en simbolo_oca
-    mov     byte [simbolo_oca], 'O'   ; se asigna el símbolo por defecto para las ocas, pisando en caso de enter
+    mov     al, [input_oca]
+    cmp     al, 0     ; verifico si se presiono enter
+    je      usar_default_oca
+    mov     [simbolo_oca], al    ; se guarda el primer símbolo ingresado por el usuario
+    jmp     construir_tablero
+usar_default_oca:
+    mov     byte [simbolo_oca], 'O'   ; se
 
 ;skip_default_oca:
 ;    mov byte [turno], TURNO_ZORRO  ; Comienza el turno del zorro
